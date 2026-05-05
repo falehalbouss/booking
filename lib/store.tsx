@@ -13,6 +13,7 @@ import type { Booking, NewBookingInput } from "./types";
 import type { Database } from "./database.types";
 
 type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 type AuthUser = {
   id: string;
@@ -75,24 +76,24 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const [profileRes, bookingsRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, name, email")
-          .eq("id", authUser.id)
-          .maybeSingle(),
-        supabase
-          .from("bookings")
-          .select("*")
-          .eq("user_id", authUser.id)
-          .order("created_at", { ascending: false }),
-      ]);
+      const profileRes = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle();
 
-      if (profileRes.data) {
+      const bookingsRes = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("user_id", authUser.id)
+        .order("created_at", { ascending: false });
+
+      const profile = profileRes.data as ProfileRow | null;
+      if (profile) {
         setUser({
-          id: profileRes.data.id,
-          name: profileRes.data.name,
-          email: profileRes.data.email,
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
         });
       } else {
         setUser({
@@ -102,7 +103,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
-      setBookings((bookingsRes.data ?? []).map(rowToBooking));
+      const rows = (bookingsRes.data ?? []) as BookingRow[];
+      setBookings(rows.map(rowToBooking));
     },
     [supabase]
   );
