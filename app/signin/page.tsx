@@ -44,7 +44,7 @@ export default function SignInPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/15 to-transparent" />
               <div className="absolute bottom-8 left-8 right-8 text-white">
                 <span className="eyebrow text-white/85">Welcome back · أهلاً بعودتك</span>
-                <p className="display-serif mt-2 text-3xl font-semibold leading-tight">
+                <p className="display-serif mt-2 text-3xl font-extrabold leading-tight">
                   Pick up where you left off.
                 </p>
                 <p className="display-serif text-2xl text-white/90 mt-1" dir="rtl">
@@ -56,7 +56,7 @@ export default function SignInPage() {
             <section className="lg:col-span-6 flex items-center">
               <div className="w-full max-w-md mx-auto">
                 <span className="eyebrow text-brand">Sign in · دخول</span>
-                <h1 className="display-serif mt-2 text-4xl font-semibold text-ink">
+                <h1 className="display-serif mt-2 text-4xl font-extrabold text-ink">
                   Welcome back
                 </h1>
                 <p className="display-serif text-2xl text-ink-muted" dir="rtl">

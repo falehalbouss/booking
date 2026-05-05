@@ -21,7 +21,7 @@ export default function Header() {
             L
           </span>
           <span className="flex flex-col leading-tight">
-            <span className="display-serif text-lg font-semibold text-ink">Layali</span>
+            <span className="display-serif text-lg font-bold text-ink">Layali</span>
             <span className="text-[10px] tracking-[0.2em] uppercase text-ink-muted" dir="rtl">
               فندق ليالي
             </span>

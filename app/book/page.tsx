@@ -44,7 +44,7 @@ function BookForm() {
         <Header />
         <main className="flex-1">
           <div className="container-page py-16 text-center">
-            <h1 className="display-serif text-3xl font-semibold text-ink">
+            <h1 className="display-serif text-3xl font-bold text-ink">
               Room not found
             </h1>
             <p className="text-base text-ink-muted mt-1" dir="rtl">
@@ -112,7 +112,7 @@ function BookForm() {
                 </div>
                 <div className="p-5">
                   <span className="eyebrow text-brand">Selected · المختارة</span>
-                  <h2 className="display-serif mt-1 text-2xl font-semibold text-ink">
+                  <h2 className="display-serif mt-1 text-2xl font-bold text-ink">
                     {room.nameEn}
                   </h2>
                   <p className="text-sm text-ink-muted" dir="rtl">{room.nameAr}</p>
@@ -134,7 +134,7 @@ function BookForm() {
 
             <section className="lg:col-span-7">
               <span className="eyebrow text-accent">Details · التفاصيل</span>
-              <h1 className="display-serif mt-1 text-4xl font-semibold text-ink">
+              <h1 className="display-serif mt-1 text-4xl font-extrabold text-ink">
                 Booking details
               </h1>
               <p className="text-lg text-ink-muted" dir="rtl">تفاصيل الحجز</p>

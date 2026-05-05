@@ -38,7 +38,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "Segoe UI", "Tahoma", "sans-serif"],
-        serif: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
+        serif: ["var(--font-serif)", "Playfair Display", "Georgia", "serif"],
       },
     },
   },

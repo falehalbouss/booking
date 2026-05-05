@@ -27,7 +27,7 @@ export default function HomePage() {
                   Boutique stays · إقامة بوتيك
                 </span>
 
-                <h1 className="display-serif mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold text-ink leading-[1.05]">
+                <h1 className="display-serif mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold text-ink leading-[1.05]">
                   {isSignedIn ? `Welcome back, ${user?.name}.` : "Slow down. Stay a while."}
                 </h1>
                 <p
@@ -80,7 +80,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent" />
                   <div className="absolute bottom-5 left-5 right-5 text-white">
                     <span className="eyebrow text-white/90">Suite · جناح</span>
-                    <p className="display-serif text-2xl font-semibold mt-1">
+                    <p className="display-serif text-2xl font-bold mt-1">
                       Golden hour, every evening.
                     </p>
                     <p className="text-sm text-white/85 mt-1" dir="rtl">
@@ -98,7 +98,7 @@ export default function HomePage() {
             <div className="flex items-baseline justify-between gap-3 mb-5">
               <div>
                 <span className="eyebrow text-accent">Yours · حجوزاتك</span>
-                <h2 className="display-serif mt-1 text-3xl font-semibold text-ink">
+                <h2 className="display-serif mt-1 text-3xl font-bold text-ink">
                   My bookings
                 </h2>
               </div>
@@ -115,7 +115,7 @@ export default function HomePage() {
 
             <Link
               href="/rooms"
-              className="mt-5 inline-flex items-center gap-1.5 text-sm text-brand font-semibold hover:underline"
+              className="mt-5 inline-flex items-center gap-1.5 text-sm text-brand font-bold hover:underline"
             >
               + Book another room · احجز غرفة أخرى
             </Link>
@@ -126,7 +126,7 @@ export default function HomePage() {
           <div className="flex items-end justify-between gap-4 mb-8">
             <div>
               <span className="eyebrow text-brand">Stay · غرفنا</span>
-              <h2 className="display-serif mt-1 text-3xl sm:text-4xl font-semibold text-ink">
+              <h2 className="display-serif mt-1 text-3xl sm:text-4xl font-bold text-ink">
                 Featured rooms
               </h2>
               <p className="text-sm text-ink-muted mt-1" dir="rtl">
@@ -169,7 +169,7 @@ export default function HomePage() {
               </div>
               <div className="lg:col-span-7">
                 <span className="eyebrow text-accent">Why Layali · لماذا ليالي</span>
-                <h2 className="display-serif mt-2 text-3xl sm:text-4xl font-semibold text-ink">
+                <h2 className="display-serif mt-2 text-3xl sm:text-4xl font-bold text-ink">
                   Small details. Warm welcome.
                 </h2>
                 <p className="display-serif text-2xl text-ink-muted mt-1" dir="rtl">
@@ -231,7 +231,7 @@ function Stat({
 }) {
   return (
     <div>
-      <div className="display-serif text-3xl font-semibold text-ink">{numEn}</div>
+      <div className="display-serif text-3xl font-bold text-ink">{numEn}</div>
       <div className="text-[10px] uppercase tracking-[0.18em] text-ink-muted mt-1">
         {labelEn}
       </div>
@@ -249,7 +249,7 @@ function BookingItem({ booking }: { booking: Booking }) {
     >
       <div className="flex items-center gap-2">
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.15em] ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] ${
             isPending
               ? "bg-brand-soft text-brand-dark"
               : "bg-accent-soft text-accent-dark"
@@ -263,7 +263,7 @@ function BookingItem({ booking }: { booking: Booking }) {
           {isPending ? "Pending" : "Confirmed"}
         </span>
       </div>
-      <h3 className="display-serif mt-3 text-xl font-semibold text-ink truncate">
+      <h3 className="display-serif mt-3 text-xl font-bold text-ink truncate">
         {booking.roomNameEn}
       </h3>
       <p className="text-sm text-ink-muted truncate" dir="rtl">
@@ -271,7 +271,7 @@ function BookingItem({ booking }: { booking: Booking }) {
       </p>
       <div className="mt-3 flex items-center justify-between gap-2 text-xs text-ink-muted">
         <span>📅 {booking.checkIn}</span>
-        <span className="font-mono font-semibold text-brand">{booking.ref}</span>
+        <span className="font-mono font-bold text-brand">{booking.ref}</span>
       </div>
     </Link>
   );
@@ -296,7 +296,7 @@ function Feature({
         {icon}
       </div>
       <div className="min-w-0">
-        <h3 className="font-semibold text-ink">{titleEn}</h3>
+        <h3 className="font-bold text-ink">{titleEn}</h3>
         <p className="text-xs text-ink-muted mt-0.5" dir="rtl">{titleAr}</p>
         <p className="mt-1.5 text-sm text-ink-muted leading-relaxed">{descEn}</p>
         <p className="text-sm text-ink-muted leading-relaxed" dir="rtl">{descAr}</p>

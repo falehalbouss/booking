@@ -22,7 +22,7 @@ export default function ConfirmationPage({
         <Header />
         <main className="flex-1">
           <div className="container-page py-16 text-center">
-            <h1 className="display-serif text-3xl font-semibold text-ink">
+            <h1 className="display-serif text-3xl font-bold text-ink">
               Booking not found
             </h1>
             <p className="text-base text-ink-muted mt-1" dir="rtl">
@@ -71,7 +71,7 @@ export default function ConfirmationPage({
                 <span className="eyebrow text-accent mt-4">
                   Confirmed · تم التأكيد
                 </span>
-                <h1 className="display-serif mt-2 text-3xl sm:text-4xl font-semibold text-ink">
+                <h1 className="display-serif mt-2 text-3xl sm:text-4xl font-extrabold text-ink">
                   Your stay is booked
                 </h1>
                 <p className="display-serif text-2xl text-ink-muted mt-1" dir="rtl">
@@ -90,7 +90,7 @@ export default function ConfirmationPage({
             </div>
 
             <div className="mt-5 card p-6 text-left">
-              <h2 className="display-serif text-xl font-semibold text-ink">
+              <h2 className="display-serif text-xl font-bold text-ink">
                 Your booking
               </h2>
               <p className="text-xs text-ink-muted" dir="rtl">تفاصيل الحجز</p>
@@ -111,7 +111,7 @@ export default function ConfirmationPage({
 
             <div className="mt-5 card p-6 bg-accent-soft/50 border-accent/15">
               <span className="eyebrow text-accent-dark">Next · ماذا بعد</span>
-              <h2 className="display-serif mt-1 text-xl font-semibold text-ink">
+              <h2 className="display-serif mt-1 text-xl font-bold text-ink">
                 What happens next
               </h2>
               <ul className="mt-4 space-y-2.5 text-sm text-ink-muted">

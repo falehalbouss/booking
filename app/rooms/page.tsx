@@ -18,7 +18,7 @@ export default function RoomsPage() {
 
           <div className="mt-4 max-w-2xl">
             <span className="eyebrow text-brand">Stay · غرفنا</span>
-            <h1 className="display-serif mt-1 text-4xl sm:text-5xl font-semibold text-ink leading-[1.05]">
+            <h1 className="display-serif mt-1 text-4xl sm:text-5xl font-extrabold text-ink leading-[1.05]">
               Our rooms
             </h1>
             <p className="display-serif text-2xl text-ink-muted mt-1" dir="rtl">

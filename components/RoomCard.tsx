@@ -22,7 +22,7 @@ export default function RoomCard({ room }: { room: Room }) {
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="display-serif text-xl font-semibold text-ink leading-tight">
+            <h3 className="display-serif text-xl font-bold text-ink leading-tight">
               {room.nameEn}
             </h3>
             <p className="text-sm text-ink-muted mt-0.5" dir="rtl">{room.nameAr}</p>
