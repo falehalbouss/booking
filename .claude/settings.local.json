@@ -3,7 +3,9 @@
     "allow": [
       "Bash(curl -s -o /dev/null -w \"Home: %{http_code}\\\\n\" http://localhost:3001/)",
       "Bash(curl -s -o /dev/null -w \"Rooms: %{http_code}\\\\n\" http://localhost:3001/rooms)",
-      "Bash(curl -s -o /dev/null -w \"Admin: %{http_code}\\\\n\" http://localhost:3001/admin)"
+      "Bash(curl -s -o /dev/null -w \"Admin: %{http_code}\\\\n\" http://localhost:3001/admin)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
