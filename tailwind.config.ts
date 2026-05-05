@@ -17,19 +17,28 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#1E3A8A",
-          dark: "#172554",
-          light: "#3B82F6",
-          soft: "#EEF2FF",
+          DEFAULT: "#B5563A",
+          dark: "#8C3F29",
+          light: "#D4805F",
+          soft: "#F4E2D6",
         },
         accent: {
-          DEFAULT: "#D4A24C",
-          dark: "#A87E2E",
-          soft: "#FBF3E2",
+          DEFAULT: "#2F4F3A",
+          dark: "#1F352A",
+          soft: "#E0EAE3",
+        },
+        sand: {
+          DEFAULT: "#E8DDC9",
+          light: "#F4ECDD",
+        },
+        ink: {
+          DEFAULT: "#1F1A17",
+          muted: "#5A4F47",
         },
       },
       fontFamily: {
-        sans: ["system-ui", "-apple-system", "Segoe UI", "Tahoma", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "Segoe UI", "Tahoma", "sans-serif"],
+        serif: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
       },
     },
   },

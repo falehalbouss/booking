@@ -6,6 +6,7 @@ export type Room = {
   descEn: string;
   descAr: string;
   capacity: number;
+  imageUrl: string;
 };
 
 export type BookingStatus = "pending" | "done";

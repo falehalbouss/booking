@@ -8,26 +8,31 @@ export default function RoomsPage() {
     <div className="min-h-dvh flex flex-col">
       <Header />
       <main className="flex-1">
-        <div className="max-w-md mx-auto px-5 py-6">
+        <div className="container-page py-8 lg:py-12">
           <Link
             href="/"
-            className="text-xs text-slate-500 hover:text-slate-700 inline-flex items-center gap-1"
+            className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1"
           >
             ← Home · الرئيسية
           </Link>
 
-          <h1 className="mt-3 text-2xl font-bold text-slate-900 tracking-tight">
-            Choose a room
-          </h1>
-          <p className="text-sm text-slate-500" dir="rtl">اختر غرفتك</p>
-          <p className="mt-2 text-sm text-slate-600">
-            Pick the room that fits your stay, then continue to booking.
-          </p>
-          <p className="text-sm text-slate-600" dir="rtl">
-            اختر الغرفة المناسبة لإقامتك ثم تابع للحجز.
-          </p>
+          <div className="mt-4 max-w-2xl">
+            <span className="eyebrow text-brand">Stay · غرفنا</span>
+            <h1 className="display-serif mt-1 text-4xl sm:text-5xl font-semibold text-ink leading-[1.05]">
+              Our rooms
+            </h1>
+            <p className="display-serif text-2xl text-ink-muted mt-1" dir="rtl">
+              غرفنا
+            </p>
+            <p className="mt-4 text-base text-ink-muted leading-relaxed">
+              Pick the room that fits your stay, then continue to booking.
+            </p>
+            <p className="text-base text-ink-muted leading-relaxed" dir="rtl">
+              اختر الغرفة المناسبة لإقامتك ثم تابع للحجز.
+            </p>
+          </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {rooms.map((room) => (
               <RoomCard key={room.id} room={room} />
             ))}

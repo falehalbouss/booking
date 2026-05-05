@@ -3,14 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --brand: #1E3A8A;
-  --brand-dark: #172554;
-  --accent: #D4A24C;
+  --brand: #B5563A;
+  --brand-dark: #8C3F29;
+  --accent: #2F4F3A;
+  --sand: #E8DDC9;
+  --ink: #1F1A17;
 }
 
 html, body {
-  background: #F5F7FB;
-  color: #0F172A;
+  background: #FBF7F1;
+  color: #1F1A17;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
 }
@@ -18,29 +20,42 @@ html, body {
 body {
   min-height: 100dvh;
   background-image:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.06), transparent 40%),
-    radial-gradient(circle at bottom left, rgba(212, 162, 76, 0.05), transparent 50%);
+    radial-gradient(circle at top right, rgba(212, 128, 95, 0.08), transparent 45%),
+    radial-gradient(circle at bottom left, rgba(47, 79, 58, 0.05), transparent 50%);
   background-attachment: fixed;
 }
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl border border-slate-200/70 transition;
-    box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.06);
+    @apply bg-white rounded-2xl border border-sand transition;
+    box-shadow: 0 1px 2px 0 rgb(31 26 23 / 0.04), 0 6px 18px -6px rgb(31 26 23 / 0.08);
   }
   .card-hover {
     @apply hover:-translate-y-0.5 transition;
   }
   .card-hover:hover {
-    box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 12px 24px -8px rgb(15 23 42 / 0.10);
+    box-shadow: 0 6px 14px -2px rgb(31 26 23 / 0.10), 0 18px 32px -10px rgb(31 26 23 / 0.14);
   }
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3 px-5 rounded-xl hover:bg-brand-dark active:scale-[0.99] transition;
   }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 bg-white border border-ink/15 text-ink font-medium py-3 px-5 rounded-xl hover:bg-sand-light active:scale-[0.99] transition;
+  }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 text-slate-700 font-medium py-2 px-3 rounded-lg hover:bg-slate-100 transition;
+    @apply inline-flex items-center justify-center gap-2 text-ink font-medium py-2 px-3 rounded-lg hover:bg-sand-light transition;
   }
   .input-base {
-    @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:border-brand focus:ring-2 focus:ring-brand/25 outline-none transition placeholder:text-slate-400;
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-ink/15 bg-white focus:border-brand focus:ring-2 focus:ring-brand/25 outline-none transition placeholder:text-ink-muted/60;
+  }
+  .display-serif {
+    font-family: var(--font-serif), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase font-medium;
+  }
+  .container-page {
+    @apply mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-5xl px-5 sm:px-6 lg:px-8;
   }
 }

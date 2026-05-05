@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -42,16 +43,20 @@ function BookForm() {
       <div className="min-h-dvh flex flex-col">
         <Header />
         <main className="flex-1">
-          <div className="max-w-md mx-auto px-5 py-10 text-center">
-            <h1 className="text-xl font-bold text-slate-900">Room not found</h1>
-            <p className="text-sm text-slate-500" dir="rtl">الغرفة غير موجودة</p>
-            <p className="mt-3 text-sm text-slate-600">
+          <div className="container-page py-16 text-center">
+            <h1 className="display-serif text-3xl font-semibold text-ink">
+              Room not found
+            </h1>
+            <p className="text-base text-ink-muted mt-1" dir="rtl">
+              الغرفة غير موجودة
+            </p>
+            <p className="mt-4 text-sm text-ink-muted">
               Please pick a room from the list.
             </p>
-            <p className="text-sm text-slate-600" dir="rtl">
+            <p className="text-sm text-ink-muted" dir="rtl">
               من فضلك اختر غرفة من القائمة.
             </p>
-            <Link href="/rooms" className="mt-6 inline-block btn-primary">
+            <Link href="/rooms" className="mt-8 btn-primary">
               Back to rooms · العودة للغرف
             </Link>
           </div>
@@ -85,94 +90,111 @@ function BookForm() {
     <div className="min-h-dvh flex flex-col">
       <Header />
       <main className="flex-1">
-        <div className="max-w-md mx-auto px-5 py-6">
+        <div className="container-page py-8 lg:py-12">
           <Link
             href="/rooms"
-            className="text-xs text-slate-500 hover:text-slate-700 inline-flex items-center gap-1"
+            className="text-xs text-ink-muted hover:text-ink inline-flex items-center gap-1"
           >
             ← Back to rooms · العودة للغرف
           </Link>
 
-          <h1 className="mt-3 text-2xl font-bold text-slate-900 tracking-tight">
-            Booking details
-          </h1>
-          <p className="text-sm text-slate-500" dir="rtl">تفاصيل الحجز</p>
+          <div className="mt-4 grid lg:grid-cols-12 gap-8 lg:gap-10">
+            <aside className="lg:col-span-5 lg:sticky lg:top-24 self-start">
+              <div className="card overflow-hidden">
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src={room.imageUrl}
+                    alt={room.nameEn}
+                    fill
+                    sizes="(min-width: 1024px) 420px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-5">
+                  <span className="eyebrow text-brand">Selected · المختارة</span>
+                  <h2 className="display-serif mt-1 text-2xl font-semibold text-ink">
+                    {room.nameEn}
+                  </h2>
+                  <p className="text-sm text-ink-muted" dir="rtl">{room.nameAr}</p>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="display-serif text-3xl font-bold text-brand">
+                      {room.priceSAR}
+                    </span>
+                    <span className="text-xs text-ink-muted">SAR / night · ريال / ليلة</span>
+                  </div>
+                  <p className="mt-4 text-sm text-ink-muted leading-relaxed">
+                    {room.descEn}
+                  </p>
+                  <p className="text-sm text-ink-muted leading-relaxed" dir="rtl">
+                    {room.descAr}
+                  </p>
+                </div>
+              </div>
+            </aside>
 
-          <div className="mt-4 card p-4 bg-gradient-to-br from-brand-soft to-white border-brand/15">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[11px] uppercase tracking-wider text-brand/70 font-semibold">
-                  Selected · المختارة
-                </div>
-                <div className="mt-1 text-base font-semibold text-slate-900">
-                  {room.nameEn}
-                </div>
-                <div className="text-sm text-slate-600" dir="rtl">{room.nameAr}</div>
-              </div>
-              <div className="text-right shrink-0">
-                <div className="text-2xl font-bold text-brand leading-none">
-                  {room.priceSAR}
-                </div>
-                <div className="text-[10px] text-slate-500 mt-1">SAR / night</div>
-                <div className="text-[10px] text-slate-500" dir="rtl">ريال / ليلة</div>
-              </div>
-            </div>
+            <section className="lg:col-span-7">
+              <span className="eyebrow text-accent">Details · التفاصيل</span>
+              <h1 className="display-serif mt-1 text-4xl font-semibold text-ink">
+                Booking details
+              </h1>
+              <p className="text-lg text-ink-muted" dir="rtl">تفاصيل الحجز</p>
+
+              <form onSubmit={onSubmit} className="mt-6 card p-6 space-y-5">
+                <Field labelEn="Full name" labelAr="الاسم الكامل" required>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    className="input-base"
+                    placeholder="Mohammed Al-Saleh"
+                  />
+                </Field>
+
+                <Field labelEn="Phone number" labelAr="رقم الجوال" required>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    className="input-base"
+                    placeholder="05xxxxxxxx"
+                  />
+                </Field>
+
+                <Field labelEn="Check-in date" labelAr="تاريخ الوصول" required>
+                  <input
+                    type="date"
+                    value={checkIn}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                    min={today}
+                    required
+                    className="input-base"
+                  />
+                </Field>
+
+                <Field labelEn="Notes (optional)" labelAr="ملاحظات (اختياري)">
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    className="input-base resize-none"
+                    placeholder="Late arrival, extra pillows, etc."
+                  />
+                </Field>
+
+                {error && (
+                  <p className="text-sm text-brand-dark bg-brand-soft border border-brand/30 rounded-xl p-3">
+                    {error}
+                  </p>
+                )}
+
+                <button type="submit" className="btn-primary w-full">
+                  Confirm booking · تأكيد الحجز
+                </button>
+              </form>
+            </section>
           </div>
-
-          <form onSubmit={onSubmit} className="mt-6 card p-5 space-y-4">
-            <Field labelEn="Full name" labelAr="الاسم الكامل" required>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="input-base"
-                placeholder="Mohammed Al-Saleh"
-              />
-            </Field>
-
-            <Field labelEn="Phone number" labelAr="رقم الجوال" required>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                className="input-base"
-                placeholder="05xxxxxxxx"
-              />
-            </Field>
-
-            <Field labelEn="Check-in date" labelAr="تاريخ الوصول" required>
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                min={today}
-                required
-                className="input-base"
-              />
-            </Field>
-
-            <Field labelEn="Notes (optional)" labelAr="ملاحظات (اختياري)">
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                className="input-base resize-none"
-                placeholder="Late arrival, extra pillows, etc."
-              />
-            </Field>
-
-            {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">
-                {error}
-              </p>
-            )}
-
-            <button type="submit" className="btn-primary w-full">
-              Confirm booking · تأكيد الحجز
-            </button>
-          </form>
         </div>
       </main>
     </div>
@@ -192,11 +214,11 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-800">
+      <span className="text-sm font-medium text-ink">
         {labelEn}
-        {required && <span className="text-red-500"> *</span>}
+        {required && <span className="text-brand"> *</span>}
       </span>
-      <span className="block text-xs text-slate-500 mb-1.5" dir="rtl">{labelAr}</span>
+      <span className="block text-xs text-ink-muted mb-1.5" dir="rtl">{labelAr}</span>
       {children}
     </label>
   );
