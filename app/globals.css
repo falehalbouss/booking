@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #1E3A8A;
+  --brand-dark: #172554;
+  --accent: #D4A24C;
+}
+
+html, body {
+  background: #F5F7FB;
+  color: #0F172A;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.06), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(212, 162, 76, 0.05), transparent 50%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200/70 transition;
+    box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.06);
+  }
+  .card-hover {
+    @apply hover:-translate-y-0.5 transition;
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 12px 24px -8px rgb(15 23 42 / 0.10);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3 px-5 rounded-xl hover:bg-brand-dark active:scale-[0.99] transition;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 text-slate-700 font-medium py-2 px-3 rounded-lg hover:bg-slate-100 transition;
+  }
+  .input-base {
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:border-brand focus:ring-2 focus:ring-brand/25 outline-none transition placeholder:text-slate-400;
+  }
+}
