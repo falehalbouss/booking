@@ -15,14 +15,22 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: React.FormEvent) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password) {
       setError("Please fill in all required fields. الرجاء تعبئة الحقول المطلوبة.");
       return;
     }
-    signIn(email);
+    setSubmitting(true);
+    const { error } = await signIn(email, password);
+    setSubmitting(false);
+    if (error) {
+      setError(error);
+      return;
+    }
     router.push("/");
   }
 
@@ -100,8 +108,12 @@ export default function SignInPage() {
                     </p>
                   )}
 
-                  <button type="submit" className="btn-primary w-full">
-                    Sign in · تسجيل الدخول
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? "Signing in…" : "Sign in · تسجيل الدخول"}
                   </button>
                 </form>
 

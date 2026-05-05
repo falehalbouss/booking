@@ -5,7 +5,9 @@
       "Bash(curl -s -o /dev/null -w \"Rooms: %{http_code}\\\\n\" http://localhost:3001/rooms)",
       "Bash(curl -s -o /dev/null -w \"Admin: %{http_code}\\\\n\" http://localhost:3001/admin)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__list_projects",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__list_organizations"
     ]
   }
 }

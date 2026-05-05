@@ -8,8 +8,8 @@ export default function Header() {
   const { isSignedIn, user, signOut } = useAuth();
   const router = useRouter();
 
-  function handleSignOut() {
-    signOut();
+  async function handleSignOut() {
+    await signOut();
     router.push("/");
   }
 

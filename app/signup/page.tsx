@@ -17,9 +17,13 @@ export default function SignUpPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: React.FormEvent) {
+  const [submitting, setSubmitting] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     if (!fullName.trim() || !email.trim() || !password || !confirm) {
       setError("Please fill in all required fields. الرجاء تعبئة الحقول المطلوبة.");
       return;
@@ -32,7 +36,19 @@ export default function SignUpPage() {
       setError("Passwords do not match. كلمتا المرور غير متطابقتين.");
       return;
     }
-    signUp(fullName, email);
+    setSubmitting(true);
+    const { error, needsConfirmation } = await signUp(fullName, email, password);
+    setSubmitting(false);
+    if (error) {
+      setError(error);
+      return;
+    }
+    if (needsConfirmation) {
+      setInfo(
+        "Check your inbox to confirm your email, then sign in. تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول."
+      );
+      return;
+    }
     router.push("/");
   }
 
@@ -135,9 +151,18 @@ export default function SignUpPage() {
                       {error}
                     </p>
                   )}
+                  {info && (
+                    <p className="text-sm text-accent-dark bg-accent-soft border border-accent/30 rounded-xl p-3">
+                      {info}
+                    </p>
+                  )}
 
-                  <button type="submit" className="btn-primary w-full">
-                    Create account · إنشاء حساب
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? "Creating…" : "Create account · إنشاء حساب"}
                   </button>
                 </form>
 

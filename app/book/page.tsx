@@ -65,20 +65,28 @@ function BookForm() {
     );
   }
 
-  function onSubmit(e: React.FormEvent) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!user) {
+      setError("Please sign in to book. الرجاء تسجيل الدخول للحجز.");
+      return;
+    }
     if (!fullName.trim() || !phone.trim() || !checkIn) {
       setError("Please fill in all required fields. الرجاء تعبئة الحقول المطلوبة.");
       return;
     }
-    const booking = addBooking({
+    setSubmitting(true);
+    const booking = await addBooking({
       roomId: room!.id,
       fullName,
       phone,
       checkIn,
       notes,
     });
+    setSubmitting(false);
     if (!booking) {
       setError("Could not create booking. تعذّر إنشاء الحجز.");
       return;
@@ -189,9 +197,26 @@ function BookForm() {
                   </p>
                 )}
 
-                <button type="submit" className="btn-primary w-full">
-                  Confirm booking · تأكيد الحجز
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {submitting ? "Saving…" : "Confirm booking · تأكيد الحجز"}
                 </button>
+
+                {!user && (
+                  <p className="text-sm text-ink-muted text-center">
+                    <Link href="/signin" className="text-brand font-bold hover:underline">
+                      Sign in
+                    </Link>{" "}
+                    to confirm your booking ·{" "}
+                    <Link href="/signin" className="text-brand font-bold hover:underline" dir="rtl">
+                      سجّل الدخول
+                    </Link>{" "}
+                    لتأكيد الحجز
+                  </p>
+                )}
               </form>
             </section>
           </div>
