@@ -1,12 +1,19 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { findRoom } from "./rooms";
 import type { Booking, NewBookingInput } from "./types";
+
+const STORAGE_KEY = "layali-store-v1";
 
 type AuthUser = {
   name: string;
   email: string;
+};
+
+type PersistedState = {
+  bookings: Booking[];
+  user: AuthUser | null;
 };
 
 type AppContextValue = {
@@ -37,9 +44,46 @@ function deriveNameFromEmail(email: string) {
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
+function loadFromStorage(): PersistedState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedState;
+    if (!Array.isArray(parsed.bookings)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveToStorage(state: PersistedState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota / private mode errors
+  }
+}
+
 export function BookingProvider({ children }: { children: React.ReactNode }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const persisted = loadFromStorage();
+    if (persisted) {
+      setBookings(persisted.bookings);
+      setUser(persisted.user);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    saveToStorage({ bookings, user });
+  }, [bookings, user, hydrated]);
 
   const addBooking = useCallback((input: NewBookingInput): Booking | null => {
     const room = findRoom(input.roomId);
