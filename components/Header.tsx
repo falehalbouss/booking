@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/store";
 
 export default function Header() {
-  const { isSignedIn, user, signOut } = useAuth();
+  const { isSignedIn, isAdmin, user, signOut } = useAuth();
   const router = useRouter();
 
   async function handleSignOut() {
@@ -35,6 +35,14 @@ export default function Header() {
           <Link href="/rooms" className="px-3 py-2 text-ink-muted hover:text-ink transition">
             Rooms
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="px-3 py-2 text-brand hover:text-brand-dark transition font-semibold"
+            >
+              Admin · المشرف
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2 text-xs">

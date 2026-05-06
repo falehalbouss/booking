@@ -9,7 +9,7 @@ import {
 } from "react";
 import { findRoom } from "./rooms";
 import { getSupabaseBrowserClient } from "./supabase";
-import type { Booking, NewBookingInput } from "./types";
+import type { Booking, BookingStatus, NewBookingInput } from "./types";
 import type { Database } from "./database.types";
 
 type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
@@ -19,9 +19,18 @@ type AuthUser = {
   id: string;
   name: string;
   email: string;
+  isAdmin: boolean;
 };
 
 type ActionResult = { error: string | null; needsConfirmation?: boolean };
+
+type AdminProfile = {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  createdAt: string;
+};
 
 type AppContextValue = {
   bookings: Booking[];
@@ -29,6 +38,7 @@ type AppContextValue = {
   getBooking: (id: string) => Booking | undefined;
   user: AuthUser | null;
   isSignedIn: boolean;
+  isAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<ActionResult>;
   signUp: (
@@ -37,6 +47,13 @@ type AppContextValue = {
     password: string
   ) => Promise<ActionResult>;
   signOut: () => Promise<void>;
+  fetchAllBookings: () => Promise<Booking[]>;
+  fetchAllProfiles: () => Promise<AdminProfile[]>;
+  updateBookingStatus: (
+    id: string,
+    status: BookingStatus
+  ) => Promise<{ error: string | null }>;
+  deleteBooking: (id: string) => Promise<{ error: string | null }>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -94,12 +111,14 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           id: profile.id,
           name: profile.name,
           email: profile.email,
+          isAdmin: profile.is_admin,
         });
       } else {
         setUser({
           id: authUser.id,
           name: authUser.email?.split("@")[0] ?? "Guest",
           email: authUser.email ?? "",
+          isAdmin: false,
         });
       }
 
@@ -201,6 +220,55 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     [bookings]
   );
 
+  const fetchAllBookings = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    return (data as BookingRow[]).map(rowToBooking);
+  }, [supabase]);
+
+  const fetchAllProfiles = useCallback(async (): Promise<AdminProfile[]> => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    return (data as ProfileRow[]).map((p) => ({
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      isAdmin: p.is_admin,
+      createdAt: p.created_at,
+    }));
+  }, [supabase]);
+
+  const updateBookingStatus = useCallback(
+    async (id: string, status: BookingStatus) => {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status })
+        .eq("id", id);
+      if (error) return { error: error.message };
+      setBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status } : b))
+      );
+      return { error: null };
+    },
+    [supabase]
+  );
+
+  const deleteBooking = useCallback(
+    async (id: string) => {
+      const { error } = await supabase.from("bookings").delete().eq("id", id);
+      if (error) return { error: error.message };
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+      return { error: null };
+    },
+    [supabase]
+  );
+
   return (
     <AppContext.Provider
       value={{
@@ -209,10 +277,15 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         getBooking,
         user,
         isSignedIn: user !== null,
+        isAdmin: user?.isAdmin ?? false,
         loading,
         signIn,
         signUp,
         signOut,
+        fetchAllBookings,
+        fetchAllProfiles,
+        updateBookingStatus,
+        deleteBooking,
       }}
     >
       {children}
@@ -232,9 +305,23 @@ export function useAuth() {
   return {
     user: ctx.user,
     isSignedIn: ctx.isSignedIn,
+    isAdmin: ctx.isAdmin,
     loading: ctx.loading,
     signIn: ctx.signIn,
     signUp: ctx.signUp,
     signOut: ctx.signOut,
+  };
+}
+
+export function useAdmin() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error("useAdmin must be used inside <BookingProvider>");
+  return {
+    isAdmin: ctx.isAdmin,
+    loading: ctx.loading,
+    fetchAllBookings: ctx.fetchAllBookings,
+    fetchAllProfiles: ctx.fetchAllProfiles,
+    updateBookingStatus: ctx.updateBookingStatus,
+    deleteBooking: ctx.deleteBooking,
   };
 }

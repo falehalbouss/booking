@@ -70,18 +70,21 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_admin: boolean
           name: string
         }
         Insert: {
           created_at?: string
           email: string
           id: string
+          is_admin?: boolean
           name: string
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          is_admin?: boolean
           name?: string
         }
         Relationships: []
