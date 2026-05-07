@@ -7,6 +7,14 @@ export type Room = {
   descAr: string;
   capacity: number;
   imageUrl: string;
+  gallery: string[];
+  beds: number;
+  baths: number;
+  sizeSqm: number;
+  rating: number;
+  reviews: number;
+  amenitiesEn: string[];
+  amenitiesAr: string[];
 };
 
 export type BookingStatus = "pending" | "done";

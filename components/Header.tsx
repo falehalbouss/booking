@@ -1,12 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LogOut, Menu, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useAuth } from "@/lib/store";
 
 export default function Header() {
   const { isSignedIn, isAdmin, user, signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   async function handleSignOut() {
     await signOut();
@@ -14,70 +30,172 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 backdrop-blur bg-[#FBF7F1]/80 border-b border-sand">
-      <div className="container-page py-3.5 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <span className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center font-serif text-lg font-bold group-hover:bg-brand-dark transition">
-            L
+    <header
+      className={`sticky top-0 z-40 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/85 backdrop-blur-md border-b border-black/5 shadow-soft"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="container-page py-3 sm:py-4 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-3 shrink-0 group">
+          <span className="relative w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center shadow-soft transition group-hover:bg-brand-dark">
+            <Sparkles className="w-5 h-5" strokeWidth={2.2} />
           </span>
           <span className="flex flex-col leading-tight">
             <span className="display-serif text-lg font-bold text-ink">Layali</span>
-            <span className="text-[10px] tracking-[0.2em] uppercase text-ink-muted" dir="rtl">
+            <span
+              className="text-[10px] tracking-[0.22em] uppercase text-ink-muted font-medium"
+              dir="rtl"
+            >
               فندق ليالي
             </span>
           </span>
         </Link>
 
-        <nav className="hidden sm:flex items-center gap-1 text-sm">
-          <Link href="/" className="px-3 py-2 text-ink-muted hover:text-ink transition">
-            Home
-          </Link>
-          <Link href="/rooms" className="px-3 py-2 text-ink-muted hover:text-ink transition">
-            Rooms
-          </Link>
+        <nav className="hidden md:flex items-center gap-1 text-sm">
+          <NavLink href="/" active={pathname === "/"}>Home · الرئيسية</NavLink>
+          <NavLink href="/rooms" active={pathname?.startsWith("/rooms")}>
+            Rooms · الغرف
+          </NavLink>
           {isAdmin && (
-            <Link
-              href="/admin"
-              className="px-3 py-2 text-brand hover:text-brand-dark transition font-semibold"
-            >
+            <NavLink href="/admin" active={pathname?.startsWith("/admin")} accent>
+              <ShieldCheck className="w-3.5 h-3.5" />
               Admin · المشرف
-            </Link>
+            </NavLink>
           )}
         </nav>
 
-        <div className="flex items-center gap-2 text-xs">
+        <div className="hidden md:flex items-center gap-2">
           {isSignedIn ? (
             <>
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sand-light text-ink-muted">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                {user?.name}
+              <span className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-sand-light border border-black/5">
+                <span className="w-7 h-7 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center">
+                  {(user?.name?.[0] ?? "?").toUpperCase()}
+                </span>
+                <span className="text-xs font-semibold text-ink truncate max-w-[8rem]">
+                  {user?.name}
+                </span>
               </span>
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="px-3 py-1.5 rounded-lg bg-ink text-white hover:bg-ink-muted transition font-medium"
+                className="btn-icon"
+                title="Sign out · خروج"
+                aria-label="Sign out"
               >
-                Sign out · خروج
+                <LogOut className="w-4 h-4" />
               </button>
             </>
           ) : (
             <>
-              <Link
-                href="/signin"
-                className="px-3 py-1.5 rounded-lg text-ink hover:bg-sand-light transition font-medium"
-              >
+              <Link href="/signin" className="btn-ghost text-sm">
                 Sign in
               </Link>
-              <Link
-                href="/signup"
-                className="hidden xs:inline-flex px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-dark transition font-medium"
-              >
-                Sign up
+              <Link href="/signup" className="btn-primary text-sm py-2.5 px-5">
+                Sign up · سجّل
               </Link>
             </>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="md:hidden btn-icon"
+          aria-label="Menu"
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      {open && (
+        <div className="md:hidden border-t border-black/5 bg-white/95 backdrop-blur-md animate-fade-up">
+          <div className="container-page py-4 flex flex-col gap-1">
+            <MobileLink href="/">Home · الرئيسية</MobileLink>
+            <MobileLink href="/rooms">Rooms · الغرف</MobileLink>
+            {isAdmin && (
+              <MobileLink href="/admin">
+                <ShieldCheck className="w-4 h-4" /> Admin · المشرف
+              </MobileLink>
+            )}
+            <div className="h-px bg-black/5 my-2" />
+            {isSignedIn ? (
+              <>
+                <div className="px-3 py-2 text-xs text-ink-muted">
+                  Signed in as <span className="font-semibold text-ink">{user?.name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="px-3 py-2.5 rounded-xl text-sm font-semibold text-left flex items-center gap-2 hover:bg-sand-light"
+                >
+                  <LogOut className="w-4 h-4" /> Sign out · تسجيل الخروج
+                </button>
+              </>
+            ) : (
+              <>
+                <MobileLink href="/signin">Sign in · تسجيل الدخول</MobileLink>
+                <MobileLink href="/signup">Sign up · إنشاء حساب</MobileLink>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
+  );
+}
+
+function NavLink({
+  href,
+  active,
+  accent,
+  children,
+}: {
+  href: string;
+  active?: boolean;
+  accent?: boolean;
+  children: React.ReactNode;
+}) {
+  const base =
+    "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition";
+  if (accent) {
+    return (
+      <Link
+        href={href}
+        className={`${base} ${
+          active ? "bg-brand text-white" : "bg-brand-soft text-brand-ink hover:bg-brand/15"
+        }`}
+      >
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <Link
+      href={href}
+      className={`${base} ${
+        active ? "bg-ink text-white" : "text-ink-muted hover:text-ink hover:bg-sand-light"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function MobileLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="px-3 py-2.5 rounded-xl text-sm font-semibold text-ink hover:bg-sand-light flex items-center gap-2"
+    >
+      {children}
+    </Link>
   );
 }

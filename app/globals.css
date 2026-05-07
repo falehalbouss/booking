@@ -3,61 +3,126 @@
 @tailwind utilities;
 
 :root {
-  --brand: #B5563A;
-  --brand-dark: #8C3F29;
-  --accent: #2F4F3A;
-  --sand: #E8DDC9;
-  --ink: #1F1A17;
+  --brand: #1F4D3F;
+  --brand-dark: #143226;
+  --accent: #C8A36A;
+  --sand: #EFE7DA;
+  --ink: #101820;
+  --surface: #FFFFFF;
 }
 
 html, body {
-  background: #FBF7F1;
-  color: #1F1A17;
+  background: #F8F5EF;
+  color: #101820;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
-  font-weight: 500;
+  font-weight: 450;
+  letter-spacing: -0.005em;
 }
 
 body {
   min-height: 100dvh;
   background-image:
-    radial-gradient(circle at top right, rgba(212, 128, 95, 0.08), transparent 45%),
-    radial-gradient(circle at bottom left, rgba(47, 79, 58, 0.05), transparent 50%);
+    radial-gradient(80rem 50rem at 110% -10%, rgba(31, 77, 63, 0.07), transparent 60%),
+    radial-gradient(60rem 40rem at -10% 110%, rgba(200, 163, 106, 0.10), transparent 55%);
   background-attachment: fixed;
 }
 
+::selection {
+  background: rgba(31, 77, 63, 0.25);
+  color: #0E2920;
+}
+
 @layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-6xl px-5 sm:px-6 lg:px-10;
+  }
+
+  .display-serif {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase font-semibold;
+  }
+
   .card {
-    @apply bg-white rounded-2xl border border-sand transition;
-    box-shadow: 0 1px 2px 0 rgb(31 26 23 / 0.04), 0 6px 18px -6px rgb(31 26 23 / 0.08);
+    @apply bg-white rounded-3xl border border-black/5 transition;
+    box-shadow: 0 1px 2px rgb(16 24 32 / 0.04), 0 8px 24px -12px rgb(16 24 32 / 0.10);
   }
-  .card-hover {
-    @apply hover:-translate-y-0.5 transition;
+
+  .card-lift {
+    @apply hover:-translate-y-1 transition;
   }
-  .card-hover:hover {
-    box-shadow: 0 6px 14px -2px rgb(31 26 23 / 0.10), 0 18px 32px -10px rgb(31 26 23 / 0.14);
+  .card-lift:hover {
+    box-shadow: 0 8px 16px -4px rgb(16 24 32 / 0.10), 0 24px 40px -12px rgb(16 24 32 / 0.18);
   }
+
+  .glass {
+    @apply backdrop-blur-md bg-white/70 border border-white/40;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition;
+  }
+  .pill-light {
+    @apply pill bg-white/85 text-ink border border-black/5 hover:bg-white;
+  }
+  .pill-brand {
+    @apply pill bg-brand text-white hover:bg-brand-dark;
+  }
+  .pill-soft {
+    @apply pill bg-brand-soft text-brand-ink;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3 px-5 rounded-xl hover:bg-brand-dark active:scale-[0.99] transition;
+    @apply inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3.5 px-6 rounded-full hover:bg-brand-dark active:scale-[0.98] transition;
+    box-shadow: 0 1px 2px rgb(16 24 32 / 0.04), 0 8px 24px -12px rgb(16 24 32 / 0.10);
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 bg-white border border-ink/15 text-ink font-medium py-3 px-5 rounded-xl hover:bg-sand-light active:scale-[0.99] transition;
+    @apply inline-flex items-center justify-center gap-2 bg-white border border-black/10 text-ink font-semibold py-3.5 px-6 rounded-full hover:bg-sand-light active:scale-[0.98] transition;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 text-ink font-medium py-2 px-3 rounded-lg hover:bg-sand-light transition;
+    @apply inline-flex items-center justify-center gap-2 text-ink font-medium py-2 px-3 rounded-full hover:bg-sand-light transition;
   }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full bg-white text-ink border border-black/5 hover:bg-sand-light transition;
+    box-shadow: 0 1px 2px rgb(16 24 32 / 0.04), 0 8px 24px -12px rgb(16 24 32 / 0.10);
+  }
+
   .input-base {
-    @apply w-full px-3.5 py-2.5 rounded-xl border border-ink/15 bg-white focus:border-brand focus:ring-2 focus:ring-brand/25 outline-none transition placeholder:text-ink-muted/60;
+    @apply w-full px-4 py-3 rounded-2xl border border-black/10 bg-white focus:border-brand focus:ring-4 focus:ring-brand/15 outline-none transition placeholder:text-ink-soft text-ink;
   }
-  .display-serif {
-    font-family: var(--font-serif), Georgia, serif;
-    font-weight: 700;
-    letter-spacing: -0.015em;
+
+  .icon-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sand-light text-ink text-xs font-medium;
   }
-  .eyebrow {
-    @apply inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase font-medium;
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fade-up 0.7s ease-out forwards;
   }
-  .container-page {
-    @apply mx-auto w-full max-w-md sm:max-w-2xl lg:max-w-5xl px-5 sm:px-6 lg:px-8;
+  .reveal-1 { animation-delay: 0.05s; }
+  .reveal-2 { animation-delay: 0.15s; }
+  .reveal-3 { animation-delay: 0.25s; }
+  .reveal-4 { animation-delay: 0.35s; }
+  .reveal-5 { animation-delay: 0.45s; }
+
+  .img-zoom {
+    @apply transition-transform duration-700 ease-out;
   }
+  .group:hover .img-zoom,
+  .img-zoom-trigger:hover .img-zoom {
+    transform: scale(1.07);
+  }
+}
+
+@layer utilities {
+  .gradient-overlay {
+    background: linear-gradient(180deg, rgba(14, 41, 32, 0) 0%, rgba(14, 41, 32, 0.55) 70%, rgba(14, 41, 32, 0.85) 100%);
+  }
+  .text-balance { text-wrap: balance; }
 }
