@@ -29,10 +29,10 @@ export default function HomePage() {
     <div className="min-h-dvh flex flex-col">
       <div className="relative">
         <Header />
-        <section className="relative h-[88dvh] sm:h-[92dvh] -mt-[64px] sm:-mt-[72px]">
+        <section className="relative h-[88dvh] sm:h-[92dvh] -mt-[80px] sm:-mt-[88px]">
           <HeroCarousel />
           <div className="absolute inset-x-0 top-0 h-[64px] sm:h-[72px]" />
-          <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16 pb-28 sm:pb-36 lg:pb-44 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16 pb-12 sm:pb-16 lg:pb-20 pointer-events-none">
             <div className="container-page mx-auto">
               <div className="flex flex-wrap items-end justify-between gap-4 pointer-events-auto">
                 <motion.div
@@ -83,7 +83,7 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1">
-        <section className="container-page -mt-12 sm:-mt-16 relative z-30">
+        <section className="container-page mt-6 sm:-mt-12 relative z-30">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
