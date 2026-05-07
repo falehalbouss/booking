@@ -37,7 +37,8 @@
       "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__execute_sql",
       "Bash(npm install *)",
       "Bash(npm ls *)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(ipconfig)"
     ]
   }
 }
