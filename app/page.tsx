@@ -83,35 +83,41 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1">
-        <section className="container-page mt-6 sm:-mt-12 relative z-30">
+        <section className="container-page mt-10 sm:mt-16 lg:mt-20 relative z-30">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5 }}
-            className="card p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3"
+            className="card p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-stretch"
           >
-            <SearchField icon={<MapPin className="w-4 h-4" />} labelEn="Where" labelAr="المكان">
-              <input
-                className="bg-transparent w-full outline-none text-sm font-semibold text-ink placeholder:text-ink-soft"
-                defaultValue="Layali Hotel · ليالي"
-              />
-            </SearchField>
-            <SearchField icon={<CalendarCheck className="w-4 h-4" />} labelEn="Check-in" labelAr="الوصول">
-              <input
-                type="date"
-                className="bg-transparent w-full outline-none text-sm font-semibold text-ink"
-              />
-            </SearchField>
-            <SearchField icon={<CalendarCheck className="w-4 h-4" />} labelEn="Check-out" labelAr="المغادرة">
-              <input
-                type="date"
-                className="bg-transparent w-full outline-none text-sm font-semibold text-ink"
-              />
-            </SearchField>
+            <div className="sm:col-span-4">
+              <SearchField icon={<MapPin className="w-4 h-4" />} labelEn="Where" labelAr="المكان">
+                <input
+                  className="bg-transparent w-full outline-none text-sm font-semibold text-ink placeholder:text-ink-soft"
+                  defaultValue="Layali Hotel · ليالي"
+                />
+              </SearchField>
+            </div>
+            <div className="sm:col-span-3">
+              <SearchField icon={<CalendarCheck className="w-4 h-4" />} labelEn="Check-in" labelAr="الوصول">
+                <input
+                  type="date"
+                  className="bg-transparent w-full outline-none text-sm font-semibold text-ink"
+                />
+              </SearchField>
+            </div>
+            <div className="sm:col-span-3">
+              <SearchField icon={<CalendarCheck className="w-4 h-4" />} labelEn="Check-out" labelAr="المغادرة">
+                <input
+                  type="date"
+                  className="bg-transparent w-full outline-none text-sm font-semibold text-ink"
+                />
+              </SearchField>
+            </div>
             <Link
               href="/rooms"
-              className="btn-primary justify-center w-full sm:w-auto"
+              className="btn-primary justify-center w-full sm:col-span-2 sm:w-full"
             >
               <Sparkles className="w-4 h-4" /> Search · بحث
             </Link>
