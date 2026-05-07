@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Menu, ShieldCheck, Sparkles, X } from "lucide-react";
+import { LogOut, Menu, ShieldCheck, Sparkles, User as UserIcon, X } from "lucide-react";
 import { useAuth } from "@/lib/store";
 
 export default function Header() {
@@ -58,6 +58,12 @@ export default function Header() {
           <NavLink href="/rooms" active={pathname?.startsWith("/rooms")}>
             Rooms · الغرف
           </NavLink>
+          {isSignedIn && (
+            <NavLink href="/profile" active={pathname?.startsWith("/profile")}>
+              <UserIcon className="w-3.5 h-3.5" />
+              Profile · الملف
+            </NavLink>
+          )}
           {isAdmin && (
             <NavLink href="/admin" active={pathname?.startsWith("/admin")} accent>
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -69,14 +75,18 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-2">
           {isSignedIn ? (
             <>
-              <span className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-sand-light border border-black/5">
+              <Link
+                href="/profile"
+                className="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-sand-light border border-black/5 hover:bg-white transition"
+                title="Profile"
+              >
                 <span className="w-7 h-7 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center">
                   {(user?.name?.[0] ?? "?").toUpperCase()}
                 </span>
                 <span className="text-xs font-semibold text-ink truncate max-w-[8rem]">
                   {user?.name}
                 </span>
-              </span>
+              </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -114,6 +124,11 @@ export default function Header() {
           <div className="container-page py-4 flex flex-col gap-1">
             <MobileLink href="/">Home · الرئيسية</MobileLink>
             <MobileLink href="/rooms">Rooms · الغرف</MobileLink>
+            {isSignedIn && (
+              <MobileLink href="/profile">
+                <UserIcon className="w-4 h-4" /> Profile · الملف
+              </MobileLink>
+            )}
             {isAdmin && (
               <MobileLink href="/admin">
                 <ShieldCheck className="w-4 h-4" /> Admin · المشرف
