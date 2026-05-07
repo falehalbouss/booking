@@ -5,7 +5,27 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { useAdmin, useAuth } from "@/lib/store";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+import type { Database } from "@/lib/database.types";
 import type { Booking, BookingStatus } from "@/lib/types";
+
+type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
+
+function rowToBooking(row: BookingRow): Booking {
+  return {
+    id: row.id,
+    ref: row.ref,
+    roomId: row.room_id,
+    roomNameEn: row.room_name_en,
+    roomNameAr: row.room_name_ar,
+    fullName: row.full_name,
+    phone: row.phone,
+    checkIn: row.check_in,
+    notes: row.notes ?? undefined,
+    status: row.status === "pending" ? "pending" : "done",
+    createdAt: row.created_at,
+  };
+}
 
 type Tab = "bookings" | "users";
 
@@ -33,6 +53,9 @@ export default function AdminPage() {
   const [profiles, setProfiles] = useState<AdminProfileRow[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
+  const [liveStatus, setLiveStatus] = useState<"connecting" | "live" | "offline">(
+    "connecting"
+  );
 
   useEffect(() => {
     if (loading) return;
@@ -65,6 +88,53 @@ export default function AdminPage() {
     fetchAllBookings,
     fetchAllProfiles,
   ]);
+
+  // Realtime subscription: keep the bookings list in sync with the DB.
+  useEffect(() => {
+    if (!isAdmin) return;
+    const supabase = getSupabaseBrowserClient();
+    setLiveStatus("connecting");
+    const channel = supabase
+      .channel("admin-bookings")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "bookings" },
+        (payload) => {
+          const incoming = rowToBooking(payload.new as BookingRow);
+          setBookings((prev) =>
+            prev.some((b) => b.id === incoming.id) ? prev : [incoming, ...prev]
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings" },
+        (payload) => {
+          const updated = rowToBooking(payload.new as BookingRow);
+          setBookings((prev) =>
+            prev.map((b) => (b.id === updated.id ? updated : b))
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "bookings" },
+        (payload) => {
+          const removedId = (payload.old as Partial<BookingRow>).id;
+          if (!removedId) return;
+          setBookings((prev) => prev.filter((b) => b.id !== removedId));
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setLiveStatus("live");
+        else if (status === "CLOSED" || status === "CHANNEL_ERROR")
+          setLiveStatus("offline");
+      });
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [isAdmin]);
 
   if (loading) {
     return (
@@ -141,8 +211,35 @@ export default function AdminPage() {
             لوحة المشرف
           </p>
         </div>
-        <div className="text-xs text-ink-muted">
-          {bookings.length} bookings · {profiles.length} users
+        <div className="flex items-center gap-3 text-xs text-ink-muted">
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${
+              liveStatus === "live"
+                ? "bg-brand-soft text-brand-ink border-brand/20"
+                : liveStatus === "connecting"
+                ? "bg-sand-light text-ink-muted border-black/5"
+                : "bg-accent-soft text-accent-dark border-accent/20"
+            }`}
+            title="Realtime status"
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                liveStatus === "live"
+                  ? "bg-brand animate-pulse"
+                  : liveStatus === "connecting"
+                  ? "bg-ink-muted"
+                  : "bg-accent"
+              }`}
+            />
+            {liveStatus === "live"
+              ? "Live · مباشر"
+              : liveStatus === "connecting"
+              ? "Connecting…"
+              : "Offline"}
+          </span>
+          <span>
+            {bookings.length} bookings · {profiles.length} users
+          </span>
         </div>
       </div>
 
