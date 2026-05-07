@@ -59,7 +59,7 @@ export default function HeroCarousel() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="absolute inset-x-0 bottom-0 z-10 px-5 sm:px-10 lg:px-16 pb-16 sm:pb-20 lg:pb-24"
+          className="absolute inset-x-0 bottom-0 z-10 px-5 sm:px-10 lg:px-16 pb-48 sm:pb-60 lg:pb-72"
         >
           <div className="max-w-3xl">
             <span className="eyebrow text-white/85">{heroSlides[index].eyebrow}</span>
