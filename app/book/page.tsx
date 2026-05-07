@@ -15,7 +15,10 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  Minus,
+  Moon,
   Phone,
+  Plus,
   Ruler,
   Star,
   StickyNote,
@@ -47,6 +50,7 @@ function BookForm() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [checkIn, setCheckIn] = useState("");
+  const [nights, setNights] = useState(1);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -97,12 +101,16 @@ function BookForm() {
       return;
     }
     setSubmitting(true);
+    const stayLabel = `Nights: ${nights} · ${nights * room!.priceSAR} SAR`;
+    const fullNotes = notes.trim()
+      ? `${stayLabel}\n${notes.trim()}`
+      : stayLabel;
     const booking = await addBooking({
       roomId: room!.id,
       fullName,
       phone,
       checkIn,
-      notes,
+      notes: fullNotes,
     });
     setSubmitting(false);
     if (!booking) {
@@ -353,6 +361,53 @@ function BookForm() {
                 </Field>
 
                 <Field
+                  icon={<Moon className="w-4 h-4" />}
+                  labelEn="Number of nights"
+                  labelAr="عدد الليالي"
+                  required
+                >
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setNights((n) => Math.max(1, n - 1))}
+                      disabled={nights <= 1}
+                      className="w-11 h-11 rounded-2xl border border-black/10 bg-white text-ink hover:bg-sand-light disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition active:scale-95"
+                      aria-label="Decrease nights"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={nights}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value || "1", 10);
+                        if (Number.isNaN(v)) return;
+                        setNights(Math.min(30, Math.max(1, v)));
+                      }}
+                      className="input-base text-center font-semibold flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNights((n) => Math.min(30, n + 1))}
+                      disabled={nights >= 30}
+                      className="w-11 h-11 rounded-2xl border border-black/10 bg-white text-ink hover:bg-sand-light disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition active:scale-95"
+                      aria-label="Increase nights"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-ink-muted">
+                    {nights} {nights === 1 ? "night" : "nights"} ·{" "}
+                    <span dir="rtl">
+                      {nights} {nights === 1 ? "ليلة" : "ليالي"}
+                    </span>{" "}
+                    × {room.priceSAR} SAR
+                  </p>
+                </Field>
+
+                <Field
                   icon={<StickyNote className="w-4 h-4" />}
                   labelEn="Notes (optional)"
                   labelAr="ملاحظات (اختياري)"
@@ -372,13 +427,27 @@ function BookForm() {
                   </p>
                 )}
 
-                <div className="flex items-center justify-between gap-4 pt-2">
-                  <div className="text-sm text-ink-muted">
-                    Total ·{" "}
-                    <span className="display-serif font-bold text-2xl text-ink">
-                      {room.priceSAR}
-                    </span>{" "}
-                    <span className="text-xs">SAR / night</span>
+                <div className="flex items-end justify-between gap-4 pt-2">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-ink-muted font-semibold">
+                      Total · <span dir="rtl">الإجمالي</span>
+                    </div>
+                    <motion.div
+                      key={nights * room.priceSAR}
+                      initial={{ opacity: 0.4, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="display-serif font-bold text-3xl text-ink leading-none mt-1"
+                    >
+                      {(nights * room.priceSAR).toLocaleString("en-US")}{" "}
+                      <span className="text-base font-semibold text-ink-muted">
+                        SAR
+                      </span>
+                    </motion.div>
+                    <div className="text-xs text-ink-muted mt-1">
+                      {nights} {nights === 1 ? "night" : "nights"} ×{" "}
+                      {room.priceSAR} SAR
+                    </div>
                   </div>
                   <button
                     type="submit"
