@@ -32,7 +32,7 @@ export default function HomePage() {
         <section className="relative h-[88dvh] sm:h-[92dvh] -mt-[64px] sm:-mt-[72px]">
           <HeroCarousel />
           <div className="absolute inset-x-0 top-0 h-[64px] sm:h-[72px]" />
-          <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16 pb-6 sm:pb-10 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16 pb-28 sm:pb-36 lg:pb-44 pointer-events-none">
             <div className="container-page mx-auto">
               <div className="flex flex-wrap items-end justify-between gap-4 pointer-events-auto">
                 <motion.div
@@ -60,7 +60,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.55, duration: 0.6, ease: "easeOut" }}
-                  className="hidden sm:flex items-center gap-3 glass rounded-full pl-2 pr-4 py-2 text-white border-white/30 bg-white/10"
+                  className="hidden lg:inline-flex items-center gap-3 glass rounded-full pl-2 pr-4 py-2 text-white border-white/30 bg-white/10 whitespace-nowrap"
                 >
                   <span className="flex -space-x-2">
                     {["A", "M", "S"].map((c, i) => (
