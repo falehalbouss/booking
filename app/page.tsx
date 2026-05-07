@@ -83,7 +83,7 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1">
-        <section className="container-page mt-10 sm:mt-16 lg:mt-20 relative z-30">
+        <section className="container-page mt-4 sm:mt-6 lg:mt-8 relative z-30">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -125,7 +125,7 @@ export default function HomePage() {
         </section>
 
         {bookings.length > 0 && (
-          <section className="container-page pt-12 sm:pt-16">
+          <section className="container-page pt-8 sm:pt-12">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -163,13 +163,13 @@ export default function HomePage() {
           </section>
         )}
 
-        <section className="container-page py-16 lg:py-24">
+        <section className="container-page pt-10 sm:pt-12 lg:pt-16 pb-16 lg:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="flex items-end justify-between gap-4 mb-10"
+            className="flex items-end justify-between gap-4 mb-8"
           >
             <div>
               <span className="eyebrow text-brand">
