@@ -2,14 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Header from "@/components/Header";
 import { heroImageUrl } from "@/lib/rooms";
 import { useAuth } from "@/lib/store";
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+
+function SignUpForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/";
   const { signUp } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +59,7 @@ export default function SignUpPage() {
       );
       return;
     }
-    router.push("/");
+    router.push(next.startsWith("/") ? next : "/");
   }
 
   return (
@@ -169,13 +179,19 @@ export default function SignUpPage() {
                 <div className="mt-6 text-center text-sm text-ink-muted">
                   <p>
                     Already have an account?{" "}
-                    <Link href="/signin" className="text-brand font-semibold hover:underline">
+                    <Link
+                      href={`/signin?next=${encodeURIComponent(next)}`}
+                      className="text-brand font-semibold hover:underline"
+                    >
                       Sign in
                     </Link>
                   </p>
                   <p dir="rtl">
                     عندك حساب بالفعل؟{" "}
-                    <Link href="/signin" className="text-brand font-semibold hover:underline">
+                    <Link
+                      href={`/signin?next=${encodeURIComponent(next)}`}
+                      className="text-brand font-semibold hover:underline"
+                    >
                       سجّل دخول
                     </Link>
                   </p>

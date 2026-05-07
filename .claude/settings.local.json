@@ -16,7 +16,25 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(npx tsc *)",
       "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__apply_migration",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(git fetch *)",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__deploy_to_vercel",
+      "Bash(npx vercel *)",
+      "Bash(GIT_TRACE=1 GIT_CURL_VERBOSE=1 git ls-remote origin)",
+      "Bash(echo \"---exit: $?\")",
+      "Bash(git push *)",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__get_project",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__list_teams",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__list_deployments",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__confirm_cost",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__create_project",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__get_project_url",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__get_publishable_keys",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__get_advisors",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__get_logs",
+      "mcp__70808fba-ebb2-422b-b56e-46513b83fb38__execute_sql"
     ]
   }
 }

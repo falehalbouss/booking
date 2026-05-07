@@ -22,7 +22,7 @@ function BookForm() {
   const roomId = params.get("roomId");
   const room = useMemo(() => findRoom(roomId), [roomId]);
   const { addBooking } = useBookings();
-  const { user } = useAuth();
+  const { user, isSignedIn, loading: authLoading } = useAuth();
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -31,6 +31,14 @@ function BookForm() {
   const [checkIn, setCheckIn] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isSignedIn) {
+      const next = roomId ? `/book?roomId=${roomId}` : "/book";
+      router.replace(`/signin?next=${encodeURIComponent(next)}`);
+    }
+  }, [authLoading, isSignedIn, roomId, router]);
 
   useEffect(() => {
     if (user?.name && !fullName) {
@@ -205,18 +213,6 @@ function BookForm() {
                   {submitting ? "Saving…" : "Confirm booking · تأكيد الحجز"}
                 </button>
 
-                {!user && (
-                  <p className="text-sm text-ink-muted text-center">
-                    <Link href="/signin" className="text-brand font-bold hover:underline">
-                      Sign in
-                    </Link>{" "}
-                    to confirm your booking ·{" "}
-                    <Link href="/signin" className="text-brand font-bold hover:underline" dir="rtl">
-                      سجّل الدخول
-                    </Link>{" "}
-                    لتأكيد الحجز
-                  </p>
-                )}
               </form>
             </section>
           </div>

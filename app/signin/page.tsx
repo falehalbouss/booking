@@ -2,14 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Header from "@/components/Header";
 import { ambianceImageUrl } from "@/lib/rooms";
 import { useAuth } from "@/lib/store";
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const next = params.get("next") || "/";
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +41,7 @@ export default function SignInPage() {
       setError(error);
       return;
     }
-    router.push("/");
+    router.push(next.startsWith("/") ? next : "/");
   }
 
   return (
@@ -120,13 +130,19 @@ export default function SignInPage() {
                 <div className="mt-6 text-center text-sm text-ink-muted">
                   <p>
                     Don&apos;t have an account?{" "}
-                    <Link href="/signup" className="text-brand font-semibold hover:underline">
+                    <Link
+                      href={`/signup?next=${encodeURIComponent(next)}`}
+                      className="text-brand font-semibold hover:underline"
+                    >
                       Create one
                     </Link>
                   </p>
                   <p dir="rtl">
                     ما عندك حساب؟{" "}
-                    <Link href="/signup" className="text-brand font-semibold hover:underline">
+                    <Link
+                      href={`/signup?next=${encodeURIComponent(next)}`}
+                      className="text-brand font-semibold hover:underline"
+                    >
                       أنشئ حساب
                     </Link>
                   </p>

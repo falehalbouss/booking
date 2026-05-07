@@ -181,7 +181,13 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    setUser(null);
+    setBookings([]);
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Even if the network call fails, the local session is already cleared.
+    }
   }, [supabase]);
 
   const addBooking = useCallback(
