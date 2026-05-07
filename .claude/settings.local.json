@@ -38,7 +38,24 @@
       "Bash(npm install *)",
       "Bash(npm ls *)",
       "Bash(npm view *)",
-      "Bash(ipconfig)"
+      "Bash(ipconfig)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__get_deployment",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__get_runtime_logs",
+      "mcp__1090c8bd-9348-464c-9a50-69beddb712f8__web_fetch_vercel_url",
+      "Bash(curl -s -I --max-time 20 https://booking-iota-virid.vercel.app/)",
+      "Bash(curl -s --max-time 20 https://booking-iota-virid.vercel.app/)",
+      "Bash(grep -oE \"\\(Find your|Hospitality|Comfort\\)[^<]{0,40}\")",
+      "Bash(curl -s --max-time 20 https://booking-iota-virid.vercel.app/_next/static/chunks/app/signin/page.js)",
+      "Bash(curl -s --max-time 20 https://booking-iota-virid.vercel.app/_next/static/chunks/main-app.js)",
+      "Bash(grep -oE \"[a-z0-9]{10,}\\\\.supabase\\\\.co\")",
+      "Bash(curl -s --max-time 30 \"https://booking-iota-virid.vercel.app/_next/static/chunks/app/page.js\")",
+      "Bash(curl -s --max-time 30 https://booking-iota-virid.vercel.app/)",
+      "Bash(curl -s --max-time 20 https://booking-iota-virid.vercel.app/_next/static/chunks/__TRACKED_VAR__.js)",
+      "Bash(grep -oE \"[a-z0-9]{15,}\\\\.supabase\\\\.co\")",
+      "Bash(curl -s --max-time 30 https://booking-iota-virid.vercel.app/signin)",
+      "Bash(curl -s --max-time 30 \"https://booking-iota-virid.vercel.app/_next/static/chunks/app/layout-4ebf3e5c5f48c0ab.js\")"
     ]
   }
 }
