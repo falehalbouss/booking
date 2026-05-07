@@ -196,25 +196,45 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       const room = findRoom(input.roomId);
       if (!room) return null;
 
-      const { data, error } = await supabase
-        .from("bookings")
-        .insert({
-          ref: generateRef(),
-          user_id: user.id,
-          room_id: room.id,
-          room_name_en: room.nameEn,
-          room_name_ar: room.nameAr,
-          full_name: input.fullName.trim(),
-          phone: input.phone.trim(),
-          check_in: input.checkIn,
-          notes: input.notes?.trim() || null,
-          status: "done",
-        })
-        .select("*")
-        .single();
+      // The strict RLS lets anyone INSERT but only admins SELECT, so we
+      // can't .select() the inserted row back. Generate the id client-side
+      // and reconstruct the Booking locally on success.
+      const id =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const ref = generateRef();
+      const createdAt = new Date().toISOString();
 
-      if (error || !data) return null;
-      const booking = rowToBooking(data);
+      const { error } = await supabase.from("bookings").insert({
+        id,
+        ref,
+        user_id: user.id,
+        room_id: room.id,
+        room_name_en: room.nameEn,
+        room_name_ar: room.nameAr,
+        full_name: input.fullName.trim(),
+        phone: input.phone.trim(),
+        check_in: input.checkIn,
+        notes: input.notes?.trim() || null,
+        status: "done",
+      });
+
+      if (error) return null;
+
+      const booking: Booking = {
+        id,
+        ref,
+        roomId: room.id,
+        roomNameEn: room.nameEn,
+        roomNameAr: room.nameAr,
+        fullName: input.fullName.trim(),
+        phone: input.phone.trim(),
+        checkIn: input.checkIn,
+        notes: input.notes?.trim() || undefined,
+        status: "done",
+        createdAt,
+      };
       setBookings((prev) => [booking, ...prev]);
       return booking;
     },
