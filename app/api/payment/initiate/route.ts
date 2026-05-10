@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendPayment } from "@/lib/myfatoorah";
+import { isDemoMode, sendPayment } from "@/lib/myfatoorah";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,6 +42,21 @@ export async function POST(req: Request) {
   }
 
   const origin = req.headers.get("origin") || new URL(req.url).origin;
+
+  // Demo mode: no MyFatoorah account configured, so simulate a successful
+  // payment by sending the customer straight to the confirmation page
+  // marked as paid. Set MYFATOORAH_API_KEY in env to switch to real
+  // MyFatoorah processing.
+  if (isDemoMode()) {
+    const demoPaymentId = `DEMO-${Date.now()}`;
+    const invoiceUrl = `${origin}/confirmation/${body.bookingId}?payment=paid&paymentId=${demoPaymentId}&demo=1`;
+    return NextResponse.json({
+      invoiceId: 0,
+      invoiceUrl,
+      demo: true,
+    });
+  }
+
   const callbackUrl = `${origin}/api/payment/callback?bookingId=${body.bookingId}`;
   const errorUrl = `${origin}/api/payment/callback?bookingId=${body.bookingId}&error=1`;
 

@@ -18,6 +18,14 @@ function getConfig() {
   };
 }
 
+// Demo mode is enabled when the merchant hasn't configured their own
+// MyFatoorah API key. The booking flow then bypasses MyFatoorah and
+// goes straight to the success page so the site is still usable for
+// demos / family preview without a real merchant account.
+export function isDemoMode(): boolean {
+  return !process.env.MYFATOORAH_API_KEY;
+}
+
 type SendPaymentInput = {
   invoiceValue: number;
   customerName: string;
@@ -66,7 +74,29 @@ export async function sendPayment(
       body: JSON.stringify(body),
     });
 
-    const json = (await res.json()) as SendPaymentResponse;
+    const text = await res.text();
+
+    if (res.status === 401) {
+      return {
+        error:
+          "MyFatoorah rejected the API token (401). Set MYFATOORAH_API_KEY in Vercel to a valid sandbox/production token from https://portal.myfatoorah.com",
+      };
+    }
+
+    if (!text) {
+      return {
+        error: `MyFatoorah returned ${res.status} with empty body. Check the API token + base URL.`,
+      };
+    }
+
+    let json: SendPaymentResponse;
+    try {
+      json = JSON.parse(text) as SendPaymentResponse;
+    } catch {
+      return {
+        error: `MyFatoorah returned non-JSON (status ${res.status}): ${text.slice(0, 200)}`,
+      };
+    }
 
     if (!json.IsSuccess || !json.Data) {
       return { error: json.Message || "MyFatoorah SendPayment failed" };
@@ -118,7 +148,22 @@ export async function getPaymentStatus(
       body: JSON.stringify({ Key: paymentId, KeyType: "PaymentId" }),
     });
 
-    const json = (await res.json()) as GetPaymentStatusResponse;
+    const text = await res.text();
+    if (res.status === 401) {
+      return { error: "MyFatoorah rejected the API token (401)" };
+    }
+    if (!text) {
+      return { error: `MyFatoorah returned ${res.status} with empty body.` };
+    }
+
+    let json: GetPaymentStatusResponse;
+    try {
+      json = JSON.parse(text) as GetPaymentStatusResponse;
+    } catch {
+      return {
+        error: `MyFatoorah returned non-JSON (status ${res.status}): ${text.slice(0, 200)}`,
+      };
+    }
 
     if (!json.IsSuccess || !json.Data) {
       return { error: json.Message || "MyFatoorah getPaymentStatus failed" };
