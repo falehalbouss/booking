@@ -55,7 +55,11 @@
       "Bash(curl -s --max-time 20 https://booking-iota-virid.vercel.app/_next/static/chunks/__TRACKED_VAR__.js)",
       "Bash(grep -oE \"[a-z0-9]{15,}\\\\.supabase\\\\.co\")",
       "Bash(curl -s --max-time 30 https://booking-iota-virid.vercel.app/signin)",
-      "Bash(curl -s --max-time 30 \"https://booking-iota-virid.vercel.app/_next/static/chunks/app/layout-4ebf3e5c5f48c0ab.js\")"
+      "Bash(curl -s --max-time 30 \"https://booking-iota-virid.vercel.app/_next/static/chunks/app/layout-4ebf3e5c5f48c0ab.js\")",
+      "Bash(curl -s -I -X OPTIONS \"https://aotqoeipgdkbgqdbyhsq.supabase.co/auth/v1/token?grant_type=password\" -H \"Origin: https://booking-iota-virid.vercel.app\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: content-type, apikey, authorization\" --max-time 15)",
+      "Bash(curl -s -I --max-time 15 https://booking-iota-virid.vercel.app/signin)",
+      "Bash(curl -s --max-time 15 -X POST \"https://aotqoeipgdkbgqdbyhsq.supabase.co/auth/v1/token?grant_type=password\" -H \"Content-Type: application/json\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHFvZWlwZ2RrYmdxZGJ5aHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMTc4ODgsImV4cCI6MjA5MzY5Mzg4OH0.OjObjYj1rVtii-XL7bNzROxzX5aGzxjVhI8Z_mzjmUM\" -H \"Origin: https://booking-iota-virid.vercel.app\" -d '{\"email\":\"nonexistent@test.com\",\"password\":\"wrong\"}')",
+      "Bash(curl -s --max-time 15 \"https://aotqoeipgdkbgqdbyhsq.supabase.co/rest/v1/bookings?select=count\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvdHFvZWlwZ2RrYmdxZGJ5aHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMTc4ODgsImV4cCI6MjA5MzY5Mzg4OH0.OjObjYj1rVtii-XL7bNzROxzX5aGzxjVhI8Z_mzjmUM\" -H \"Origin: https://booking-iota-virid.vercel.app\" -w \"\\\\n\\\\nHTTP %{http_code} in %{time_total}s\\\\n\")"
     ]
   }
 }
