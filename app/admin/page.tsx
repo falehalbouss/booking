@@ -343,6 +343,9 @@ function BookingsTable({
               <Th>Phone · الجوال</Th>
               <Th>Room · الغرفة</Th>
               <Th>Check-in · الوصول</Th>
+              <Th>Nights · ليالي</Th>
+              <Th>Total · الإجمالي</Th>
+              <Th>Payment · الدفع</Th>
               <Th>Status · الحالة</Th>
               <Th>Actions · إجراءات</Th>
             </tr>
@@ -376,6 +379,16 @@ function BookingsTable({
                   </div>
                 </Td>
                 <Td>{b.checkIn}</Td>
+                <Td className="text-center">{b.nights}</Td>
+                <Td>
+                  <span className="font-semibold text-ink">
+                    {b.totalKWD.toLocaleString("en-US")}
+                  </span>{" "}
+                  <span className="text-xs text-ink-muted">KWD</span>
+                </Td>
+                <Td>
+                  <PaymentBadge status={b.paymentStatus} />
+                </Td>
                 <Td>
                   <StatusBadge status={b.status} />
                 </Td>
@@ -476,10 +489,43 @@ function StatusBadge({ status }: { status: BookingStatus }) {
   );
 }
 
-function Th({ children }: { children: React.ReactNode }) {
-  return <th className="text-left px-4 py-3 font-medium">{children}</th>;
+function PaymentBadge({ status }: { status: Booking["paymentStatus"] }) {
+  if (status === "paid") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-soft text-accent-dark text-xs font-semibold">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+        Paid · مدفوع
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand-soft text-brand-ink text-xs font-semibold">
+        <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+        Failed · فشل
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-sand text-ink text-xs font-semibold">
+      <span className="w-1.5 h-1.5 rounded-full bg-ink-muted animate-pulse" />
+      Pending · معلق
+    </span>
+  );
 }
 
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="px-4 py-3 align-top">{children}</td>;
+function Th({ children }: { children: React.ReactNode }) {
+  return <th className="text-left px-4 py-3 font-medium whitespace-nowrap">{children}</th>;
+}
+
+function Td({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <td className={`px-4 py-3 align-top ${className ?? ""}`}>{children}</td>
+  );
 }
