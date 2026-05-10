@@ -155,11 +155,34 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback<AppContextValue["signIn"]>(
     async (email, password) => {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+      // Some networks (Kaspersky/Norton HTTPS scan, corporate proxies, parental
+      // controls) accept the POST but never deliver the response back to the
+      // browser. Race the call against an 8s timeout, then fall back to
+      // checking whether a session was actually established locally.
+      const trimmedEmail = email.trim();
+      const signInPromise = supabase.auth.signInWithPassword({
+        email: trimmedEmail,
         password,
       });
-      return { error: error?.message ?? null };
+      const timeout = new Promise<"timeout">((resolve) =>
+        setTimeout(() => resolve("timeout"), 8000)
+      );
+
+      const result = await Promise.race([signInPromise, timeout]);
+
+      if (result === "timeout") {
+        // Give the supabase client another beat to process the response
+        // (sometimes it lands but takes longer than 8s) and then verify.
+        await new Promise((r) => setTimeout(r, 800));
+        const { data } = await supabase.auth.getSession();
+        if (data.session) return { error: null };
+        return {
+          error:
+            "Your network blocked the response. Try mobile data, a VPN, or disable HTTPS scanning. · شبكتك حجبت الرد. جرّب بيانات الجوال أو VPN أو عطّل HTTPS scan في برنامج الحماية.",
+        };
+      }
+
+      return { error: result.error?.message ?? null };
     },
     [supabase]
   );
