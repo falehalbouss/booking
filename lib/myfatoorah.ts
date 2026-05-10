@@ -4,11 +4,12 @@
 const TEST_BASE_URL = "https://apitest.myfatoorah.com";
 const LIVE_BASE_URL = "https://api.myfatoorah.com";
 
-// Public test token from MyFatoorah documentation. Used as the default so
-// the integration works out of the box. Override in production via the
-// MYFATOORAH_API_KEY env var.
+// Public test token from the MyFatoorah documentation
+// (https://docs.myfatoorah.com/docs/api-key). Used as the default so the
+// integration works out of the box without a merchant account. Override
+// in production via the MYFATOORAH_API_KEY env var.
 const TEST_TOKEN =
-  "rLtt6JWvbUHDDhsZnfpAhpYk4dxYDQkbcPTyGaKp2TYqQgG7FGZ5Th_WD53Oq8Ebz6A53njUoo1w3pjU1D4vs_ZMqFiz_j0urb_BH9Oq9VZoKFoJEDAbRZepGcQanImyYrry7Kt6MnMdgfG5jn4HngWoRdKduNNyP4kzcp3mRv7x00ahkm9LAK7ZRieg7k1PDAnBIOG3EyVSJ5kK4WLMvYr7sCwHbHcu4A5WwelxYK0GMJy37bNAarSJDFQsJ2ZvJjvMDmfWwDVFEVe_5tOomfVNt6bOg9mexbGjMrnHBnKnZR1vQbBtQieDlQepzTZMuQrSuKn-t5XZM7V6fCW7oP-uXGX-sMOajeX65JOf6XVpk29DP6ro8WTuZcUJpo7Gj7p84Hi9OZlugn4DGEoOzpdAW4yPoy0Y1JVtVMG6q9CukZ4-VmOQNsSEpVEGZuhB4ZySCxIz1FZxhTqg64bLtg2lLwQk7uZi7sluaYRzWSF-OapyaQymq3MqUz9rfTC1AkDC5_d3uYLxeLwIv4uhDH9pRC_C_8d1OmCzAVQRNGBWayp1Cj-tT9eyYuS8Q5UV3Y4z3oR6PZjFL9WQK4XLnJWy1WX4z9eEC4dkHOXtMGw5LQOmOYkKPF6cHLAk5wQUlF-zlyRxvFA6oETV3RZk6r6CXHmkHvfvg2D_PnLZWO9oFLE3KJaa_S2dfRIKCLI3vWk6Lhpp9o7gNoIcimkKv4HOZGDNECwqMdo3kIY_HzRfaO9HpVvfbR3HX5sk1AjC2KxxWSlsvJEfIhnsj";
+  "SK_KWT_vVZlnnAqu8jRByOWaRPNId4ShzEDNt256dvnjebuyzo52dXjAfRx2ixW5umjWSUx";
 
 function getConfig() {
   const isLive = process.env.MYFATOORAH_MODE === "live";
@@ -18,12 +19,11 @@ function getConfig() {
   };
 }
 
-// Demo mode is enabled when the merchant hasn't configured their own
-// MyFatoorah API key. The booking flow then bypasses MyFatoorah and
-// goes straight to the success page so the site is still usable for
-// demos / family preview without a real merchant account.
+// Kept for backwards-compat with the API route, but always returns false
+// now: the bundled public sandbox token works for testing without a real
+// account, so we no longer need a fake-payment shortcut.
 export function isDemoMode(): boolean {
-  return !process.env.MYFATOORAH_API_KEY;
+  return false;
 }
 
 type SendPaymentInput = {
