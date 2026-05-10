@@ -219,9 +219,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       const room = findRoom(input.roomId);
       if (!room) return null;
 
-      // The strict RLS lets anyone INSERT but only admins SELECT, so we
-      // can't .select() the inserted row back. Generate the id client-side
-      // and reconstruct the Booking locally on success.
+      // Generate the id client-side so we always have something to navigate
+      // to even if the server response is delayed/dropped by the user's
+      // network (HTTPS scanning, proxies, etc).
       const id =
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
@@ -229,7 +229,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       const ref = generateRef();
       const createdAt = new Date().toISOString();
 
-      const { error } = await supabase.from("bookings").insert({
+      const insertPromise = supabase.from("bookings").insert({
         id,
         ref,
         user_id: user.id,
@@ -243,7 +243,15 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         status: "done",
       });
 
-      if (error) return null;
+      const timeout = new Promise<"timeout">((resolve) =>
+        setTimeout(() => resolve("timeout"), 8000)
+      );
+
+      const result = await Promise.race([insertPromise, timeout]);
+
+      if (result !== "timeout" && result.error) {
+        return null;
+      }
 
       const booking: Booking = {
         id,
