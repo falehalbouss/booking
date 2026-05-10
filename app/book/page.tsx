@@ -101,23 +101,24 @@ function BookForm() {
       return;
     }
     setSubmitting(true);
-    const stayLabel = `Nights: ${nights} · ${nights * room!.priceSAR} SAR`;
-    const fullNotes = notes.trim()
-      ? `${stayLabel}\n${notes.trim()}`
-      : stayLabel;
-    const booking = await addBooking({
+    const result = await addBooking({
       roomId: room!.id,
       fullName,
       phone,
       checkIn,
-      notes: fullNotes,
+      nights,
+      notes,
     });
     setSubmitting(false);
-    if (!booking) {
-      setError("Could not create booking. تعذّر إنشاء الحجز.");
+    if ("error" in result) {
+      setError(
+        result.error ||
+          "Could not create booking. تعذّر إنشاء الحجز."
+      );
       return;
     }
-    router.push(`/confirmation/${booking.id}`);
+    // Redirect the customer to MyFatoorah's hosted payment page.
+    window.location.href = result.paymentUrl;
   }
 
   const gallery = room.gallery.length ? room.gallery : [room.imageUrl];
@@ -208,10 +209,10 @@ function BookForm() {
                     </div>
                     <div className="text-right shrink-0">
                       <div className="display-serif text-3xl font-bold text-brand leading-none">
-                        {room.priceSAR}
+                        {room.priceKWD}
                       </div>
                       <div className="text-[10px] tracking-wider uppercase text-ink-muted mt-1">
-                        SAR / night
+                        KWD / night
                       </div>
                     </div>
                   </div>
@@ -403,7 +404,7 @@ function BookForm() {
                     <span dir="rtl">
                       {nights} {nights === 1 ? "ليلة" : "ليالي"}
                     </span>{" "}
-                    × {room.priceSAR} SAR
+                    × {room.priceKWD} KWD
                   </p>
                 </Field>
 
@@ -433,20 +434,20 @@ function BookForm() {
                       Total · <span dir="rtl">الإجمالي</span>
                     </div>
                     <motion.div
-                      key={nights * room.priceSAR}
+                      key={nights * room.priceKWD}
                       initial={{ opacity: 0.4, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.25 }}
                       className="display-serif font-bold text-3xl text-ink leading-none mt-1"
                     >
-                      {(nights * room.priceSAR).toLocaleString("en-US")}{" "}
+                      {(nights * room.priceKWD).toLocaleString("en-US")}{" "}
                       <span className="text-base font-semibold text-ink-muted">
-                        SAR
+                        KWD
                       </span>
                     </motion.div>
                     <div className="text-xs text-ink-muted mt-1">
                       {nights} {nights === 1 ? "night" : "nights"} ×{" "}
-                      {room.priceSAR} SAR
+                      {room.priceKWD} KWD
                     </div>
                   </div>
                   <button
@@ -454,7 +455,9 @@ function BookForm() {
                     disabled={submitting}
                     className="btn-primary group disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {submitting ? "Saving…" : "Confirm · تأكيد"}
+                    {submitting
+                      ? "Redirecting to payment…"
+                      : "Pay & confirm · ادفع وأكّد"}
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </div>

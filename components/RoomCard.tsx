@@ -71,10 +71,10 @@ export default function RoomCard({ room }: { room: Room }) {
           </div>
           <div className="text-right shrink-0">
             <div className="display-serif text-2xl font-bold text-brand leading-none">
-              {room.priceSAR}
+              {room.priceKWD}
             </div>
             <div className="text-[10px] tracking-wider uppercase text-ink-muted mt-1.5">
-              SAR / night
+              KWD / night
             </div>
           </div>
         </div>

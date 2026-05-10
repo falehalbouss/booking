@@ -21,6 +21,15 @@ function rowToBooking(row: BookingRow): Booking {
     fullName: row.full_name,
     phone: row.phone,
     checkIn: row.check_in,
+    nights: row.nights ?? 1,
+    totalKWD: Number(row.total_kwd ?? 0),
+    paymentStatus:
+      row.payment_status === "paid"
+        ? "paid"
+        : row.payment_status === "failed"
+        ? "failed"
+        : "pending",
+    paymentId: row.payment_id ?? undefined,
     notes: row.notes ?? undefined,
     status: row.status === "pending" ? "pending" : "done",
     createdAt: row.created_at,

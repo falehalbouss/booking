@@ -9,7 +9,12 @@ import {
 } from "react";
 import { findRoom } from "./rooms";
 import { getSupabaseBrowserClient } from "./supabase";
-import type { Booking, BookingStatus, NewBookingInput } from "./types";
+import type {
+  Booking,
+  BookingStatus,
+  NewBookingInput,
+  PaymentStatus,
+} from "./types";
 import type { Database } from "./database.types";
 
 type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
@@ -32,10 +37,20 @@ type AdminProfile = {
   createdAt: string;
 };
 
+type AddBookingResult =
+  | { booking: Booking; paymentUrl: string }
+  | { error: string };
+
 type AppContextValue = {
   bookings: Booking[];
-  addBooking: (input: NewBookingInput) => Promise<Booking | null>;
+  addBooking: (input: NewBookingInput) => Promise<AddBookingResult>;
   getBooking: (id: string) => Booking | undefined;
+  refreshBooking: (id: string) => Promise<Booking | null>;
+  applyPaymentResult: (
+    bookingId: string,
+    paymentStatus: PaymentStatus,
+    paymentId?: string
+  ) => Promise<void>;
   user: AuthUser | null;
   isSignedIn: boolean;
   isAdmin: boolean;
@@ -73,6 +88,10 @@ function rowToBooking(row: BookingRow): Booking {
     fullName: row.full_name,
     phone: row.phone,
     checkIn: row.check_in,
+    nights: row.nights ?? 1,
+    totalKWD: Number(row.total_kwd ?? 0),
+    paymentStatus: (row.payment_status ?? "pending") as PaymentStatus,
+    paymentId: row.payment_id ?? undefined,
     notes: row.notes ?? undefined,
     status: row.status === "pending" ? "pending" : "done",
     createdAt: row.created_at,
@@ -259,22 +278,21 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const addBooking = useCallback(
-    async (input: NewBookingInput): Promise<Booking | null> => {
-      if (!user) return null;
+    async (input: NewBookingInput): Promise<AddBookingResult> => {
+      if (!user) return { error: "Please sign in first." };
       const room = findRoom(input.roomId);
-      if (!room) return null;
+      if (!room) return { error: "Room not found." };
 
-      // Generate the id client-side so we always have something to navigate
-      // to even if the server response is delayed/dropped by the user's
-      // network (HTTPS scanning, proxies, etc).
       const id =
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const ref = generateRef();
       const createdAt = new Date().toISOString();
+      const nights = Math.max(1, Math.min(30, input.nights || 1));
+      const totalKWD = Number((nights * room.priceKWD).toFixed(3));
 
-      const insertPromise = supabase.from("bookings").insert({
+      const { error: insertError } = await supabase.from("bookings").insert({
         id,
         ref,
         user_id: user.id,
@@ -284,18 +302,15 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         full_name: input.fullName.trim(),
         phone: input.phone.trim(),
         check_in: input.checkIn,
+        nights,
+        total_kwd: totalKWD,
         notes: input.notes?.trim() || null,
-        status: "done",
+        status: "pending",
+        payment_status: "pending",
       });
 
-      const timeout = new Promise<"timeout">((resolve) =>
-        setTimeout(() => resolve("timeout"), 8000)
-      );
-
-      const result = await Promise.race([insertPromise, timeout]);
-
-      if (result !== "timeout" && result.error) {
-        return null;
+      if (insertError) {
+        return { error: insertError.message };
       }
 
       const booking: Booking = {
@@ -307,14 +322,106 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         fullName: input.fullName.trim(),
         phone: input.phone.trim(),
         checkIn: input.checkIn,
+        nights,
+        totalKWD,
+        paymentStatus: "pending",
         notes: input.notes?.trim() || undefined,
-        status: "done",
+        status: "pending",
         createdAt,
       };
       setBookings((prev) => [booking, ...prev]);
-      return booking;
+
+      // Initiate payment via our API route (server-side keeps the
+      // MyFatoorah token secret).
+      try {
+        const res = await fetch("/api/payment/initiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingId: id,
+            bookingRef: ref,
+            totalKWD,
+            customerName: input.fullName.trim(),
+            customerMobile: input.phone.trim(),
+            language: "en",
+          }),
+        });
+        const json = (await res.json()) as
+          | { invoiceUrl: string; invoiceId: number }
+          | { error: string };
+
+        if (!res.ok || "error" in json) {
+          const msg =
+            "error" in json ? json.error : `Payment init failed (${res.status})`;
+          return { error: msg };
+        }
+
+        // Persist the MyFatoorah invoice id so we can recover later.
+        void supabase
+          .from("bookings")
+          .update({ payment_id: String(json.invoiceId) })
+          .eq("id", id);
+
+        return { booking, paymentUrl: json.invoiceUrl };
+      } catch (e) {
+        return {
+          error: e instanceof Error ? e.message : "Network error",
+        };
+      }
     },
     [supabase, user]
+  );
+
+  const refreshBooking = useCallback(
+    async (id: string): Promise<Booking | null> => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error || !data) return null;
+      const booking = rowToBooking(data as BookingRow);
+      setBookings((prev) => {
+        const exists = prev.some((b) => b.id === booking.id);
+        return exists
+          ? prev.map((b) => (b.id === booking.id ? booking : b))
+          : [booking, ...prev];
+      });
+      return booking;
+    },
+    [supabase]
+  );
+
+  const applyPaymentResult = useCallback(
+    async (
+      bookingId: string,
+      paymentStatus: PaymentStatus,
+      paymentId?: string
+    ) => {
+      const update: {
+        payment_status: PaymentStatus;
+        status?: BookingStatus;
+        payment_id?: string;
+      } = { payment_status: paymentStatus };
+      if (paymentStatus === "paid") update.status = "done";
+      if (paymentId) update.payment_id = paymentId;
+
+      await supabase.from("bookings").update(update).eq("id", bookingId);
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingId
+            ? {
+                ...b,
+                paymentStatus,
+                paymentId: paymentId ?? b.paymentId,
+                status: paymentStatus === "paid" ? "done" : b.status,
+              }
+            : b
+        )
+      );
+    },
+    [supabase]
   );
 
   const getBooking = useCallback(
@@ -377,6 +484,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         bookings,
         addBooking,
         getBooking,
+        refreshBooking,
+        applyPaymentResult,
         user,
         isSignedIn: user !== null,
         isAdmin: user?.isAdmin ?? false,

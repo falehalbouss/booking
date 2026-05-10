@@ -2,7 +2,7 @@ export type Room = {
   id: string;
   nameEn: string;
   nameAr: string;
-  priceSAR: number;
+  priceKWD: number;
   descEn: string;
   descAr: string;
   capacity: number;
@@ -18,6 +18,7 @@ export type Room = {
 };
 
 export type BookingStatus = "pending" | "done";
+export type PaymentStatus = "pending" | "paid" | "failed";
 
 export type Booking = {
   id: string;
@@ -28,6 +29,10 @@ export type Booking = {
   fullName: string;
   phone: string;
   checkIn: string;
+  nights: number;
+  totalKWD: number;
+  paymentStatus: PaymentStatus;
+  paymentId?: string;
   notes?: string;
   status: BookingStatus;
   createdAt: string;
@@ -38,5 +43,6 @@ export type NewBookingInput = {
   fullName: string;
   phone: string;
   checkIn: string;
+  nights: number;
   notes?: string;
 };

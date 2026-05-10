@@ -46,14 +46,14 @@ export default function RoomsPage() {
       r = r.filter((room) => room.capacity >= guests);
     }
     if (typeof maxPrice === "number") {
-      r = r.filter((room) => room.priceSAR <= maxPrice);
+      r = r.filter((room) => room.priceKWD <= maxPrice);
     }
     switch (sort) {
       case "price-asc":
-        r.sort((a, b) => a.priceSAR - b.priceSAR);
+        r.sort((a, b) => a.priceKWD - b.priceKWD);
         break;
       case "price-desc":
-        r.sort((a, b) => b.priceSAR - a.priceSAR);
+        r.sort((a, b) => b.priceKWD - a.priceKWD);
         break;
       case "rating":
         r.sort((a, b) => b.rating - a.rating);
@@ -156,15 +156,15 @@ export default function RoomsPage() {
               label={
                 maxPrice === ""
                   ? "Any price"
-                  : `≤ ${maxPrice} SAR`
+                  : `≤ ${maxPrice} KWD`
               }
               active={maxPrice !== ""}
               onClick={() =>
                 setMaxPrice(
                   maxPrice === ""
-                    ? 500
-                    : maxPrice === 500
-                    ? 1000
+                    ? 40
+                    : maxPrice === 40
+                    ? 80
                     : ""
                 )
               }
