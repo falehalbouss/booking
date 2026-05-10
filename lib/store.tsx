@@ -356,13 +356,22 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           return { error: msg };
         }
 
-        // Persist the MyFatoorah invoice id so we can recover later.
-        void supabase
-          .from("bookings")
-          .update({ payment_id: String(json.invoiceId) })
-          .eq("id", id);
+        // Persist the MyFatoorah invoice id BEFORE redirecting so we
+        // can recover the booking later from its payment id.
+        const paymentId = String(json.invoiceId);
+        try {
+          await supabase
+            .from("bookings")
+            .update({ payment_id: paymentId })
+            .eq("id", id);
+        } catch {
+          // best effort — payment can still complete via the callback flow
+        }
+        setBookings((prev) =>
+          prev.map((b) => (b.id === id ? { ...b, paymentId } : b))
+        );
 
-        return { booking, paymentUrl: json.invoiceUrl };
+        return { booking: { ...booking, paymentId }, paymentUrl: json.invoiceUrl };
       } catch (e) {
         return {
           error: e instanceof Error ? e.message : "Network error",
