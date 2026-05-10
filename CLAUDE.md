@@ -34,7 +34,7 @@ When you add a new auth- or booking-related concern, extend `AppContextValue` an
 
 ### Browser-only Supabase
 
-This project uses `@supabase/ssr`'s **browser** client only — there is no server client, no middleware, and no server actions. Every page that needs data is `"use client"` and reads through `getSupabaseBrowserClient()` (memoized singleton in [lib/supabase.ts](lib/supabase.ts)). RLS is the only access boundary.
+This project uses `@supabase/supabase-js` `createClient` directly (not `@supabase/ssr`) with explicit `localStorage` for session persistence. No server client, no middleware, no server actions. Every page that needs data is `"use client"` and reads through `getSupabaseBrowserClient()` (memoized singleton in [lib/supabase.ts](lib/supabase.ts)). The localStorage approach avoids cross-domain cookie issues that broke sign-in for users on networks with strict tracking prevention. RLS is the only access boundary.
 
 ### Static rooms, dynamic bookings
 

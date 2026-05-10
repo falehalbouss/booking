@@ -93,37 +93,50 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const profileRes = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", authUser.id)
-        .maybeSingle();
+      // Set basic user info immediately from the auth payload so the UI
+      // doesn't wait for the profile + bookings round-trip. We refine it
+      // below if those calls succeed.
+      setUser((prev) =>
+        prev?.id === authUser.id
+          ? prev
+          : {
+              id: authUser.id,
+              name: authUser.email?.split("@")[0] ?? "Guest",
+              email: authUser.email ?? "",
+              isAdmin: false,
+            }
+      );
 
-      const bookingsRes = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("user_id", authUser.id)
-        .order("created_at", { ascending: false });
-
-      const profile = profileRes.data as ProfileRow | null;
-      if (profile) {
-        setUser({
-          id: profile.id,
-          name: profile.name,
-          email: profile.email,
-          isAdmin: profile.is_admin,
-        });
-      } else {
-        setUser({
-          id: authUser.id,
-          name: authUser.email?.split("@")[0] ?? "Guest",
-          email: authUser.email ?? "",
-          isAdmin: false,
-        });
+      try {
+        const profileRes = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", authUser.id)
+          .maybeSingle();
+        const profile = profileRes.data as ProfileRow | null;
+        if (profile) {
+          setUser({
+            id: profile.id,
+            name: profile.name,
+            email: profile.email,
+            isAdmin: profile.is_admin,
+          });
+        }
+      } catch {
+        // ignore, basic user info is already set
       }
 
-      const rows = (bookingsRes.data ?? []) as BookingRow[];
-      setBookings(rows.map(rowToBooking));
+      try {
+        const bookingsRes = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("user_id", authUser.id)
+          .order("created_at", { ascending: false });
+        const rows = (bookingsRes.data ?? []) as BookingRow[];
+        setBookings(rows.map(rowToBooking));
+      } catch {
+        // ignore — bookings stay as they were (possibly local additions)
+      }
     },
     [supabase]
   );
@@ -131,24 +144,40 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!mounted) return;
-      await loadForAuthUser(session?.user ?? null);
+    // Always release the loading flag within 3s so the UI can render
+    // even if auth.getSession() never resolves on a flaky network.
+    const loadingFallback = setTimeout(() => {
       if (mounted) setLoading(false);
+    }, 3000);
+
+    (async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!mounted) return;
+        await loadForAuthUser(session?.user ?? null);
+      } catch {
+        // ignore — UI proceeds in signed-out state
+      } finally {
+        if (mounted) {
+          clearTimeout(loadingFallback);
+          setLoading(false);
+        }
+      }
     })();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      await loadForAuthUser(session?.user ?? null);
+      // Fire-and-forget: never block on this.
+      void loadForAuthUser(session?.user ?? null);
     });
 
     return () => {
       mounted = false;
+      clearTimeout(loadingFallback);
       subscription.unsubscribe();
     };
   }, [supabase, loadForAuthUser]);
@@ -189,15 +218,31 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback<AppContextValue["signUp"]>(
     async (name, email, password) => {
-      const { data, error } = await supabase.auth.signUp({
+      const signUpPromise = supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           data: { name: name.trim() },
         },
       });
-      if (error) return { error: error.message };
-      const needsConfirmation = !data.session;
+      const timeout = new Promise<"timeout">((resolve) =>
+        setTimeout(() => resolve("timeout"), 8000)
+      );
+
+      const result = await Promise.race([signUpPromise, timeout]);
+
+      if (result === "timeout") {
+        await new Promise((r) => setTimeout(r, 800));
+        const { data } = await supabase.auth.getSession();
+        if (data.session) return { error: null };
+        return {
+          error:
+            "Your network blocked the response. Try mobile data, a VPN, or disable HTTPS scanning. · شبكتك حجبت الرد. جرّب بيانات الجوال أو VPN أو عطّل HTTPS scan في برنامج الحماية.",
+        };
+      }
+
+      if (result.error) return { error: result.error.message };
+      const needsConfirmation = !result.data.session;
       return { error: null, needsConfirmation };
     },
     [supabase]
