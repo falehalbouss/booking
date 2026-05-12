@@ -74,9 +74,28 @@ export async function GET(req: Request) {
     );
   }
 
-  const paymentParam = status.invoiceStatus === "Paid" ? "paid" : "failed";
+  const isPaid = status.invoiceStatus === "Paid";
+
+  // Persist the verified payment outcome server-side. The client used to
+  // do this from the confirmation page based on URL query params, which
+  // let any signed-in user mark their own booking as paid by hand-typing
+  // ?payment=paid in the URL bar — a complete payment bypass.
+  const { error: updateError } = await admin
+    .from("bookings")
+    .update({
+      payment_status: isPaid ? "paid" : "failed",
+      status: isPaid ? "done" : "pending",
+      payment_id: paymentId,
+    })
+    .eq("id", bookingId);
+
+  if (updateError) {
+    return NextResponse.redirect(
+      `${origin}/confirmation/${bookingId}?payment=failed`
+    );
+  }
 
   return NextResponse.redirect(
-    `${origin}/confirmation/${bookingId}?payment=${paymentParam}&paymentId=${paymentId}`
+    `${origin}/confirmation/${bookingId}?payment=${isPaid ? "paid" : "failed"}`
   );
 }

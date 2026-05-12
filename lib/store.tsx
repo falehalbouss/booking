@@ -46,11 +46,6 @@ type AppContextValue = {
   addBooking: (input: NewBookingInput) => Promise<AddBookingResult>;
   getBooking: (id: string) => Booking | undefined;
   refreshBooking: (id: string) => Promise<Booking | null>;
-  applyPaymentResult: (
-    bookingId: string,
-    paymentStatus: PaymentStatus,
-    paymentId?: string
-  ) => Promise<void>;
   user: AuthUser | null;
   isSignedIn: boolean;
   isAdmin: boolean;
@@ -417,37 +412,12 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     [supabase]
   );
 
-  const applyPaymentResult = useCallback(
-    async (
-      bookingId: string,
-      paymentStatus: PaymentStatus,
-      paymentId?: string
-    ) => {
-      const update: {
-        payment_status: PaymentStatus;
-        status?: BookingStatus;
-        payment_id?: string;
-      } = { payment_status: paymentStatus };
-      if (paymentStatus === "paid") update.status = "done";
-      if (paymentId) update.payment_id = paymentId;
-
-      await supabase.from("bookings").update(update).eq("id", bookingId);
-
-      setBookings((prev) =>
-        prev.map((b) =>
-          b.id === bookingId
-            ? {
-                ...b,
-                paymentStatus,
-                paymentId: paymentId ?? b.paymentId,
-                status: paymentStatus === "paid" ? "done" : b.status,
-              }
-            : b
-        )
-      );
-    },
-    [supabase]
-  );
+  // Note: the previous applyPaymentResult() helper was removed. It let
+  // the client mark its own booking as paid based on URL query params,
+  // which any signed-in user could forge by typing ?payment=paid into
+  // the browser. The MyFatoorah callback now performs the verified DB
+  // write server-side using a service-role client. The confirmation
+  // page only re-reads the booking row to render the result.
 
   const getBooking = useCallback(
     (id: string) => bookings.find((b) => b.id === id),
@@ -510,7 +480,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         addBooking,
         getBooking,
         refreshBooking,
-        applyPaymentResult,
         user,
         isSignedIn: user !== null,
         isAdmin: user?.isAdmin ?? false,
