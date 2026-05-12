@@ -319,7 +319,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (insertError) {
-        return { error: insertError.message };
+        console.error("[addBooking] insert failed:", insertError);
+        return { error: "Could not save your booking. Please try again." };
       }
 
       const booking: Booking = {

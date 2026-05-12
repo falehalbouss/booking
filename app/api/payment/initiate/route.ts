@@ -88,7 +88,14 @@ export async function POST(req: Request) {
   });
 
   if ("error" in result) {
-    return NextResponse.json({ error: result.error }, { status: 502 });
+    // Don't leak gateway internals (API token rejections, raw upstream
+    // bodies, etc.) to the browser. Log them server-side and surface
+    // an opaque error.
+    console.error("[payment/initiate] MyFatoorah error:", result.error);
+    return NextResponse.json(
+      { error: "Payment provider unavailable" },
+      { status: 502 }
+    );
   }
 
   return NextResponse.json({
