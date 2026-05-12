@@ -1,41 +1,44 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { isDemoMode, sendPayment } from "@/lib/myfatoorah";
 import { findRoom } from "@/lib/rooms";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-type Body = {
-  bookingId: string;
-  bookingRef: string;
-  roomId: string;
-  nights: number;
-  customerName: string;
-  customerMobile: string;
-  language?: "en" | "ar";
-};
+// Strict input schema: cap string lengths so an attacker can't bloat
+// the DB or send oversized payloads to MyFatoorah, and enforce a
+// phone-shaped customerMobile.
+const InitiateSchema = z.object({
+  bookingId: z.string().uuid(),
+  bookingRef: z.string().min(3).max(32),
+  roomId: z.string().min(1).max(32),
+  nights: z.number().int().min(1).max(30),
+  customerName: z.string().min(1).max(100),
+  customerMobile: z
+    .string()
+    .min(6)
+    .max(20)
+    .regex(/^\+?[0-9]+$/, "Phone must be digits, optionally with +"),
+  language: z.enum(["en", "ar"]).optional(),
+});
 
 export async function POST(req: Request) {
-  let body: Body;
+  let raw: unknown;
   try {
-    body = (await req.json()) as Body;
+    raw = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (
-    !body.bookingId ||
-    !body.bookingRef ||
-    !body.roomId ||
-    typeof body.nights !== "number" ||
-    !body.customerName ||
-    !body.customerMobile
-  ) {
+  const parsed = InitiateSchema.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "Invalid request" },
       { status: 400 }
     );
   }
+  const body = parsed.data;
 
   // Look up the room price server-side. The client must not be trusted to
   // tell us how much to charge — a tampered request could otherwise pay
@@ -45,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unknown room" }, { status: 400 });
   }
 
-  const nights = Math.max(1, Math.min(30, Math.floor(body.nights)));
+  const nights = body.nights;
   const totalKWD = Number((nights * room.priceKWD).toFixed(3));
 
   if (totalKWD <= 0) {

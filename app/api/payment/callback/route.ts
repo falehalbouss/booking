@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getPaymentStatus } from "@/lib/myfatoorah";
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
+
+const BookingIdSchema = z.string().uuid();
+const PaymentIdSchema = z.string().min(1).max(64);
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -12,21 +16,25 @@ export const runtime = "nodejs";
 // paymentId to mark their own booking as paid).
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const bookingId = url.searchParams.get("bookingId");
-  const paymentId = url.searchParams.get("paymentId");
+  const rawBookingId = url.searchParams.get("bookingId");
+  const rawPaymentId = url.searchParams.get("paymentId");
   const isError = url.searchParams.get("error") === "1";
   const origin = process.env.NEXT_PUBLIC_SITE_URL || url.origin;
 
-  if (!bookingId) {
+  const bookingIdResult = BookingIdSchema.safeParse(rawBookingId);
+  if (!bookingIdResult.success) {
     return NextResponse.redirect(`${origin}/`);
   }
+  const bookingId = bookingIdResult.data;
 
   // Customer hit the error url (cancelled, declined, etc).
-  if (isError || !paymentId) {
+  const paymentIdResult = PaymentIdSchema.safeParse(rawPaymentId);
+  if (isError || !paymentIdResult.success) {
     return NextResponse.redirect(
       `${origin}/confirmation/${bookingId}?payment=failed`
     );
   }
+  const paymentId = paymentIdResult.data;
 
   const status = await getPaymentStatus(paymentId);
 
