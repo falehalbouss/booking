@@ -41,7 +41,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const origin = req.headers.get("origin") || new URL(req.url).origin;
+  // Use the request URL's own origin (or the explicitly configured site URL)
+  // rather than the client-supplied Origin header, which an attacker could
+  // spoof to redirect the post-payment callback to a host they control.
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
 
   // Demo mode: no MyFatoorah account configured, so simulate a successful
   // payment by sending the customer straight to the confirmation page
