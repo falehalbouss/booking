@@ -73,9 +73,23 @@ type AppContextValue = {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+// Booking reference: LH- prefix + 8 hex chars from a cryptographically
+// secure source (~4.3 billion values), so refs cannot be enumerated and
+// effectively never collide. Falls back to Math.random() only in old
+// runtimes where crypto.getRandomValues isn't available.
 function generateRef() {
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `LH-${num}`;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
+  const len = 8;
+  let out = "";
+  if (typeof crypto !== "undefined" && "getRandomValues" in crypto) {
+    const buf = new Uint32Array(len);
+    crypto.getRandomValues(buf);
+    for (let i = 0; i < len; i++) out += alphabet[buf[i] % alphabet.length];
+  } else {
+    for (let i = 0; i < len; i++)
+      out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `LH-${out}`;
 }
 
 function rowToBooking(row: BookingRow): Booking {
