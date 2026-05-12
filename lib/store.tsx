@@ -346,7 +346,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       setBookings((prev) => [booking, ...prev]);
 
       // Initiate payment via our API route (server-side keeps the
-      // MyFatoorah token secret).
+      // MyFatoorah token secret AND recomputes the amount from roomId
+      // + nights so the client cannot tamper with the price).
       try {
         const res = await fetch("/api/payment/initiate", {
           method: "POST",
@@ -354,7 +355,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             bookingId: id,
             bookingRef: ref,
-            totalKWD,
+            roomId: room.id,
+            nights,
             customerName: input.fullName.trim(),
             customerMobile: input.phone.trim(),
             language: "en",

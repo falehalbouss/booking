@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isDemoMode, sendPayment } from "@/lib/myfatoorah";
+import { findRoom } from "@/lib/rooms";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -7,7 +8,8 @@ export const runtime = "nodejs";
 type Body = {
   bookingId: string;
   bookingRef: string;
-  totalKWD: number;
+  roomId: string;
+  nights: number;
   customerName: string;
   customerMobile: string;
   language?: "en" | "ar";
@@ -24,7 +26,8 @@ export async function POST(req: Request) {
   if (
     !body.bookingId ||
     !body.bookingRef ||
-    typeof body.totalKWD !== "number" ||
+    !body.roomId ||
+    typeof body.nights !== "number" ||
     !body.customerName ||
     !body.customerMobile
   ) {
@@ -34,11 +37,19 @@ export async function POST(req: Request) {
     );
   }
 
-  if (body.totalKWD <= 0) {
-    return NextResponse.json(
-      { error: "Invalid amount" },
-      { status: 400 }
-    );
+  // Look up the room price server-side. The client must not be trusted to
+  // tell us how much to charge — a tampered request could otherwise pay
+  // 1 KWD for a 100 KWD stay.
+  const room = findRoom(body.roomId);
+  if (!room) {
+    return NextResponse.json({ error: "Unknown room" }, { status: 400 });
+  }
+
+  const nights = Math.max(1, Math.min(30, Math.floor(body.nights)));
+  const totalKWD = Number((nights * room.priceKWD).toFixed(3));
+
+  if (totalKWD <= 0) {
+    return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
   }
 
   // Use the request URL's own origin (or the explicitly configured site URL)
@@ -64,7 +75,7 @@ export async function POST(req: Request) {
   const errorUrl = `${origin}/api/payment/callback?bookingId=${body.bookingId}&error=1`;
 
   const result = await sendPayment({
-    invoiceValue: body.totalKWD,
+    invoiceValue: totalKWD,
     customerName: body.customerName,
     customerMobile: body.customerMobile,
     customerReference: body.bookingRef,
@@ -80,5 +91,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     invoiceId: result.invoiceId,
     invoiceUrl: result.invoiceUrl,
+    totalKWD,
   });
 }
