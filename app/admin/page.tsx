@@ -182,7 +182,8 @@ export default function AdminPage() {
     const { error } = await updateBookingStatus(id, status);
     setBusyId(null);
     if (error) {
-      alert(`Failed: ${error}`);
+      console.error("[admin] action failed:", error);
+      alert("Action failed. Check the console for details.");
       return;
     }
     setBookings((prev) =>
@@ -202,7 +203,8 @@ export default function AdminPage() {
     const { error } = await deleteBooking(id);
     setBusyId(null);
     if (error) {
-      alert(`Failed: ${error}`);
+      console.error("[admin] action failed:", error);
+      alert("Action failed. Check the console for details.");
       return;
     }
     setBookings((prev) => prev.filter((b) => b.id !== id));
