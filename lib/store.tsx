@@ -367,17 +367,11 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           return { error: msg };
         }
 
-        // Persist the MyFatoorah invoice id BEFORE redirecting so we
-        // can recover the booking later from its payment id.
+        // The MyFatoorah callback now writes the verified payment_id
+        // server-side after the user pays, so we no longer need a
+        // client-side UPDATE on bookings (which the dropped RLS policy
+        // would block anyway).
         const paymentId = String(json.invoiceId);
-        try {
-          await supabase
-            .from("bookings")
-            .update({ payment_id: paymentId })
-            .eq("id", id);
-        } catch {
-          // best effort — payment can still complete via the callback flow
-        }
         setBookings((prev) =>
           prev.map((b) => (b.id === id ? { ...b, paymentId } : b))
         );
