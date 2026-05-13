@@ -38,8 +38,18 @@ function SignUpForm() {
       setError("Please fill in all required fields. الرجاء تعبئة الحقول المطلوبة.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters. كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+    if (password.length < 10) {
+      setError(
+        "Password must be at least 10 characters. كلمة المرور يجب أن تكون 10 أحرف على الأقل."
+      );
+      return;
+    }
+    const hasLetter = /[A-Za-z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    if (!hasLetter || !hasDigit) {
+      setError(
+        "Password must contain letters and numbers. يجب أن تحتوي كلمة المرور على أحرف وأرقام."
+      );
       return;
     }
     if (password !== confirm) {
@@ -137,9 +147,9 @@ function SignUpForm() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       autoComplete="new-password"
-                      minLength={6}
+                      minLength={10}
                       className="input-base"
-                      placeholder="At least 6 characters"
+                      placeholder="At least 10 chars, letters + numbers"
                     />
                   </Field>
 
@@ -150,7 +160,7 @@ function SignUpForm() {
                       onChange={(e) => setConfirm(e.target.value)}
                       required
                       autoComplete="new-password"
-                      minLength={6}
+                      minLength={10}
                       className="input-base"
                       placeholder="••••••••"
                     />

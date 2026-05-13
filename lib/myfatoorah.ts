@@ -13,9 +13,22 @@ const TEST_TOKEN =
 
 function getConfig() {
   const isLive = process.env.MYFATOORAH_MODE === "live";
+  const envToken = process.env.MYFATOORAH_API_KEY;
+
+  // Refuse to fall back to the bundled public sandbox token when the app
+  // is configured for live mode — otherwise a missing/typo'd env var on
+  // production would silently route real customer payments through the
+  // sandbox merchant account.
+  if (isLive && !envToken) {
+    throw new Error(
+      "MYFATOORAH_API_KEY must be set when MYFATOORAH_MODE=live. " +
+        "Refusing to fall back to the public sandbox token in production."
+    );
+  }
+
   return {
     baseUrl: isLive ? LIVE_BASE_URL : TEST_BASE_URL,
-    token: process.env.MYFATOORAH_API_KEY || TEST_TOKEN,
+    token: envToken || TEST_TOKEN,
   };
 }
 

@@ -18,9 +18,8 @@ export default function ConfirmationPage({
   const { id } = params;
   const searchParams = useSearchParams();
   const paymentParam = searchParams.get("payment"); // "paid" | "failed" | null
-  const paymentIdParam = searchParams.get("paymentId");
 
-  const { getBooking, refreshBooking, applyPaymentResult } = useBookings();
+  const { getBooking, refreshBooking } = useBookings();
   const [booking, setBooking] = useState<Booking | undefined>(() =>
     getBooking(id)
   );
@@ -29,14 +28,12 @@ export default function ConfirmationPage({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // If we just came back from MyFatoorah, persist the result.
-      if (paymentParam === "paid" || paymentParam === "failed") {
-        await applyPaymentResult(
-          id,
-          paymentParam,
-          paymentIdParam ?? undefined
-        );
-      }
+      // The MyFatoorah callback now writes the verified payment outcome
+      // server-side BEFORE redirecting here. We only need to re-read the
+      // booking row so the UI reflects what the server already persisted.
+      // Do NOT call applyPaymentResult from the client — that previously
+      // let any signed-in user mark their booking paid by typing
+      // ?payment=paid into the URL.
       const fresh = await refreshBooking(id);
       if (!cancelled) {
         setBooking(fresh ?? getBooking(id));
@@ -47,7 +44,7 @@ export default function ConfirmationPage({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, paymentParam, paymentIdParam]);
+  }, [id, paymentParam]);
 
   const room = findRoom(booking?.roomId);
 

@@ -46,11 +46,6 @@ type AppContextValue = {
   addBooking: (input: NewBookingInput) => Promise<AddBookingResult>;
   getBooking: (id: string) => Booking | undefined;
   refreshBooking: (id: string) => Promise<Booking | null>;
-  applyPaymentResult: (
-    bookingId: string,
-    paymentStatus: PaymentStatus,
-    paymentId?: string
-  ) => Promise<void>;
   user: AuthUser | null;
   isSignedIn: boolean;
   isAdmin: boolean;
@@ -73,9 +68,23 @@ type AppContextValue = {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+// Booking reference: LH- prefix + 8 hex chars from a cryptographically
+// secure source (~4.3 billion values), so refs cannot be enumerated and
+// effectively never collide. Falls back to Math.random() only in old
+// runtimes where crypto.getRandomValues isn't available.
 function generateRef() {
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `LH-${num}`;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
+  const len = 8;
+  let out = "";
+  if (typeof crypto !== "undefined" && "getRandomValues" in crypto) {
+    const buf = new Uint32Array(len);
+    crypto.getRandomValues(buf);
+    for (let i = 0; i < len; i++) out += alphabet[buf[i] % alphabet.length];
+  } else {
+    for (let i = 0; i < len; i++)
+      out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `LH-${out}`;
 }
 
 function rowToBooking(row: BookingRow): Booking {
@@ -310,7 +319,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (insertError) {
-        return { error: insertError.message };
+        console.error("[addBooking] insert failed:", insertError);
+        return { error: "Could not save your booking. Please try again." };
       }
 
       const booking: Booking = {
@@ -332,7 +342,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       setBookings((prev) => [booking, ...prev]);
 
       // Initiate payment via our API route (server-side keeps the
-      // MyFatoorah token secret).
+      // MyFatoorah token secret AND recomputes the amount from roomId
+      // + nights so the client cannot tamper with the price).
       try {
         const res = await fetch("/api/payment/initiate", {
           method: "POST",
@@ -340,7 +351,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             bookingId: id,
             bookingRef: ref,
-            totalKWD,
+            roomId: room.id,
+            nights,
             customerName: input.fullName.trim(),
             customerMobile: input.phone.trim(),
             language: "en",
@@ -356,17 +368,11 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           return { error: msg };
         }
 
-        // Persist the MyFatoorah invoice id BEFORE redirecting so we
-        // can recover the booking later from its payment id.
+        // The MyFatoorah callback now writes the verified payment_id
+        // server-side after the user pays, so we no longer need a
+        // client-side UPDATE on bookings (which the dropped RLS policy
+        // would block anyway).
         const paymentId = String(json.invoiceId);
-        try {
-          await supabase
-            .from("bookings")
-            .update({ payment_id: paymentId })
-            .eq("id", id);
-        } catch {
-          // best effort — payment can still complete via the callback flow
-        }
         setBookings((prev) =>
           prev.map((b) => (b.id === id ? { ...b, paymentId } : b))
         );
@@ -401,37 +407,12 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     [supabase]
   );
 
-  const applyPaymentResult = useCallback(
-    async (
-      bookingId: string,
-      paymentStatus: PaymentStatus,
-      paymentId?: string
-    ) => {
-      const update: {
-        payment_status: PaymentStatus;
-        status?: BookingStatus;
-        payment_id?: string;
-      } = { payment_status: paymentStatus };
-      if (paymentStatus === "paid") update.status = "done";
-      if (paymentId) update.payment_id = paymentId;
-
-      await supabase.from("bookings").update(update).eq("id", bookingId);
-
-      setBookings((prev) =>
-        prev.map((b) =>
-          b.id === bookingId
-            ? {
-                ...b,
-                paymentStatus,
-                paymentId: paymentId ?? b.paymentId,
-                status: paymentStatus === "paid" ? "done" : b.status,
-              }
-            : b
-        )
-      );
-    },
-    [supabase]
-  );
+  // Note: the previous applyPaymentResult() helper was removed. It let
+  // the client mark its own booking as paid based on URL query params,
+  // which any signed-in user could forge by typing ?payment=paid into
+  // the browser. The MyFatoorah callback now performs the verified DB
+  // write server-side using a service-role client. The confirmation
+  // page only re-reads the booking row to render the result.
 
   const getBooking = useCallback(
     (id: string) => bookings.find((b) => b.id === id),
@@ -494,7 +475,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         addBooking,
         getBooking,
         refreshBooking,
-        applyPaymentResult,
         user,
         isSignedIn: user !== null,
         isAdmin: user?.isAdmin ?? false,
